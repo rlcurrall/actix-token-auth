@@ -1,0 +1,38 @@
+# Project Specific files
+.env
+
+# Easily hide/untrack files/folders by adding underscore to front
+_*
+
+# Rust specific files
+/target
+/debug
+Cargo.lock
+**/*.rs.bk
+
+# IntelliJ project files
+*.iml
+*.iws
+*.ipr
+.idea/
+
+# eclipse project file
+.settings/
+.classpath
+.project
+
+# NetBeans specific
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+
+# IDE File/Folders
+.vscode
+.idea
+
+# OS
+.DS_Store

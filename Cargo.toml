@@ -1,0 +1,18 @@
+[package]
+name = "rc_server"
+version = "0.1.0"
+authors = ["Robb Currall <rlcurra@castlebranch.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-web = "3.3.0"
+chrono = { version = "0.4.19", features = ["serde"] }
+dotenv = "0.15.0"
+env_logger = "0.8.2"
+futures = "0.3.8"
+log = "0.4.11"
+serde = "1.0.117"
+serde_json = "1.0.59"
+sqlx = { version = "0.4.1", features = ["runtime-async-std-native-tls", "postgres", "chrono"] }
