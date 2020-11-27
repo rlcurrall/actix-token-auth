@@ -1,15 +1,8 @@
-use crate::models::User;
+use crate::models::user::{CreateUser, User};
 use actix_web::web;
 use actix_web::{delete, get, post, put, HttpResponse, Responder};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use sqlx::PgPool;
-
-#[derive(Serialize, Deserialize)]
-pub struct CreateUserRequest {
-    pub email: String,
-    pub password: String,
-    pub full_name: String,
-}
 
 #[derive(Serialize)]
 pub struct ErrorMessage {
@@ -18,8 +11,6 @@ pub struct ErrorMessage {
 
 #[get("/user/{id}")]
 pub async fn find(id: web::Path<i64>, db_pool: web::Data<PgPool>) -> impl Responder {
-    log::info!("{}", id);
-
     let res = User::find(id.into_inner(), &db_pool).await;
 
     match res {
@@ -31,18 +22,35 @@ pub async fn find(id: web::Path<i64>, db_pool: web::Data<PgPool>) -> impl Respon
 }
 
 #[post("/user")]
-pub async fn create(req_body: web::Json<CreateUserRequest>) -> impl Responder {
-    HttpResponse::Ok().json(req_body.into_inner())
+pub async fn create(req_body: web::Json<CreateUser>, db_pool: web::Data<PgPool>) -> impl Responder {
+    let res = User::create(req_body.into_inner(), &db_pool).await;
+
+    match res {
+        Ok(user) => HttpResponse::Ok().json(user),
+        Err(e) => HttpResponse::InternalServerError().json(ErrorMessage {
+            message: format!("Could not create user: {}", e),
+        }),
+    }
 }
 
 #[put("/user/{id}")]
-pub async fn update(_id: web::Path<i64>, req_body: web::Json<CreateUserRequest>) -> impl Responder {
+pub async fn update(_id: web::Path<i64>, req_body: web::Json<CreateUser>) -> impl Responder {
     HttpResponse::Ok().json(req_body.into_inner())
 }
 
 #[delete("/user/{id}")]
-pub async fn delete(id: web::Path<i64>) -> impl Responder {
-    HttpResponse::Ok().body(format!("{}", id))
+pub async fn delete(id: web::Path<i64>, db_pool: web::Data<PgPool>) -> impl Responder {
+    let res = User::delete(id.into_inner(), &db_pool).await;
+
+    match res {
+        Ok(0) => HttpResponse::NotFound().json(ErrorMessage {
+            message: "User not found, could not delete.".into()
+        }),
+        Ok(_) => HttpResponse::NoContent().finish(),
+        Err(e) => HttpResponse::InternalServerError().json(ErrorMessage {
+            message: format!("Could not create user: {}", e),
+        }),
+    }
 }
 
 pub fn init(cfg: &mut web::ServiceConfig) {
