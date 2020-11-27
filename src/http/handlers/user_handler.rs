@@ -44,7 +44,7 @@ pub async fn delete(id: web::Path<i64>, db_pool: web::Data<PgPool>) -> impl Resp
 
     match res {
         Ok(0) => HttpResponse::NotFound().json(ErrorMessage {
-            message: "User not found, could not delete.".into()
+            message: "User not found, could not delete.".into(),
         }),
         Ok(_) => HttpResponse::NoContent().finish(),
         Err(e) => HttpResponse::InternalServerError().json(ErrorMessage {
