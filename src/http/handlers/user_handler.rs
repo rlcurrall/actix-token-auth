@@ -21,7 +21,7 @@ pub async fn find(id: web::Path<i64>, db_pool: web::Data<PgPool>) -> impl Respon
     }
 }
 
-#[post("/user")]
+#[post("/register")]
 pub async fn create(req_body: web::Json<CreateUser>, db_pool: web::Data<PgPool>) -> impl Responder {
     let res = User::create(req_body.into_inner(), &db_pool).await;
 
