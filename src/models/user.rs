@@ -1,6 +1,4 @@
-use actix_web::{Error, HttpRequest, HttpResponse, Responder};
 use chrono::{DateTime, Utc};
-use futures::future::{ready, Ready};
 use rcs::hash;
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::*;
@@ -23,19 +21,6 @@ pub struct User {
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub deleted_at: Option<DateTime<Utc>>,
-}
-
-impl Responder for User {
-    type Error = Error;
-    type Future = Ready<Result<HttpResponse, Error>>;
-
-    fn respond_to(self, _req: &HttpRequest) -> Self::Future {
-        let body = serde_json::to_string(&self).unwrap();
-
-        ready(Ok(HttpResponse::Ok()
-            .content_type("application/json")
-            .body(body)))
-    }
 }
 
 impl User {
