@@ -1,6 +1,7 @@
 use actix_web::{Error, HttpRequest, HttpResponse, Responder};
 use chrono::{DateTime, Utc};
 use futures::future::{ready, Ready};
+use rcs::hash;
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::*;
 use sqlx::{FromRow, PgPool};
@@ -62,7 +63,7 @@ impl User {
     }
 
     pub async fn create(data: CreateUser, pool: &PgPool) -> sqlx::Result<Self> {
-        let password = crate::hash_make(data.password);
+        let password = hash::make(data.password);
         let res = sqlx::query!(
             r#"
                 INSERT INTO users (email, password, full_name)

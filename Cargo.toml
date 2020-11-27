@@ -1,5 +1,5 @@
 [package]
-name = "rc_server"
+name = "rcs"
 version = "0.1.0"
 authors = ["Robb Currall <rlcurra@castlebranch.com>"]
 edition = "2018"
