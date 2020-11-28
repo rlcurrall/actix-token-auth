@@ -25,7 +25,7 @@ impl ResponseError for ServiceError {
         match self {
             ServiceError::InternalServerError => {
                 HttpResponse::InternalServerError().json(ErrorMessage {
-                    message: "Internal Server Error, Please try later".into(),
+                    message: "Internal Server Error, please try later.".into(),
                 })
             }
             ServiceError::BadRequest(ref message) => {

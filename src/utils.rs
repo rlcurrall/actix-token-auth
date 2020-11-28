@@ -4,6 +4,7 @@ pub mod config {
         pub app_key: String,
         pub app_domain: String,
         pub app_secure: bool,
+        pub app_debug: bool,
     }
 
     impl Config {
@@ -13,6 +14,10 @@ pub mod config {
                 app_domain: std::env::var("APP_DOMAIN").expect("APP_DOMAIN not set."),
                 app_secure: std::env::var("APP_SECURE")
                     .expect("APP_SECURE not set.")
+                    .parse::<bool>()
+                    .unwrap(),
+                app_debug: std::env::var("APP_DEBUG")
+                    .unwrap_or("false".into())
                     .parse::<bool>()
                     .unwrap(),
             }

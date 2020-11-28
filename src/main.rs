@@ -15,6 +15,8 @@ async fn main() -> std::io::Result<()> {
     let config = config::Config::init();
     env_logger::Builder::new().parse_env("LOG_LEVEL").init();
 
+    log::info!("debug? {}", config.app_debug);
+
     let db_pool = db::get_connection_pool().await;
 
     HttpServer::new(move || {
