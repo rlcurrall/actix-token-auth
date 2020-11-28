@@ -9,8 +9,8 @@ struct ErrorMessage {
 
 #[derive(Debug, Display)]
 pub enum ServiceError {
-    #[display(fmt = "Internal Server Error")]
-    InternalServerError,
+    #[display(fmt = "Internal Server Error - {}", _0)]
+    InternalServerError(String),
 
     #[display(fmt = "BadRequest - {}", _0)]
     BadRequest(String),
@@ -23,9 +23,9 @@ pub enum ServiceError {
 impl ResponseError for ServiceError {
     fn error_response(&self) -> HttpResponse {
         match self {
-            ServiceError::InternalServerError => {
+            ServiceError::InternalServerError(ref message) => {
                 HttpResponse::InternalServerError().json(ErrorMessage {
-                    message: "Internal Server Error, please try later.".into(),
+                    message: message.into(),
                 })
             }
             ServiceError::BadRequest(ref message) => {

@@ -86,7 +86,7 @@ pub async fn delete(id: web::Path<i64>, db_pool: web::Data<PgPool>) -> impl Resp
             "Could not create user - {}",
             e
         ))),
-        _ => Err(ServiceError::InternalServerError),
+        _ => Err(ServiceError::InternalServerError("".into())),
     }
 }
 

@@ -139,7 +139,7 @@ impl FromRequest for User {
                 Err(msg) => {
                     identity.forget();
                     log::error!("{}", msg);
-                    return Err(ServiceError::InternalServerError.into());
+                    return Err(ServiceError::InternalServerError("".into()).into());
                 }
             }
         })
