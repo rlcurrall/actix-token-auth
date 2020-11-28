@@ -1,12 +1,16 @@
 use crate::models::user::{CreateUser, User};
+use crate::http::errors::ServiceError;
+use actix_identity::Identity;
 use actix_web::web;
 use actix_web::{delete, get, post, put, HttpResponse, Responder};
-use serde::Serialize;
+use rcs::hash;
+use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
-#[derive(Serialize)]
-pub struct ErrorMessage {
-    message: String,
+#[derive(Serialize, Deserialize)]
+pub struct LoginRequest {
+    pub email: String,
+    pub password: String,
 }
 
 #[get("/user/{id}")]
@@ -14,11 +18,35 @@ pub async fn find(id: web::Path<i64>, db_pool: web::Data<PgPool>) -> impl Respon
     let res = User::find(id.into_inner(), &db_pool).await;
 
     match res {
-        Ok(user) => HttpResponse::Ok().json(user),
-        Err(_) => HttpResponse::NotFound().json(ErrorMessage {
-            message: "User not found.".into(),
-        }),
+        Ok(user) => Ok(HttpResponse::Ok().json(user)),
+        Err(_) => Err(ServiceError::BadRequest("User not found.".into())),
     }
+}
+
+#[post("/login")]
+pub async fn login(
+    request: web::Json<LoginRequest>,
+    id: Identity,
+    db_pool: web::Data<PgPool>,
+) -> impl Responder {
+    let res = User::find_by_email(request.email.clone(), &db_pool).await;
+
+    match res {
+        Ok(user) => {
+            if hash::check(user.password.clone(), request.password.clone()) {
+                id.remember(serde_json::to_string(&user).unwrap());
+                return Ok(HttpResponse::Ok().finish());
+            }
+
+            Err(ServiceError::BadRequest("These credentials do not match our records.".into()))
+        }
+        Err(_) => Err(ServiceError::BadRequest("These credentials do not match our records.".into())),
+    }
+}
+
+#[get("/me")]
+pub async fn me(me: User) -> impl Responder {
+    HttpResponse::Ok().json(me)
 }
 
 #[post("/register")]
@@ -26,10 +54,8 @@ pub async fn create(req_body: web::Json<CreateUser>, db_pool: web::Data<PgPool>)
     let res = User::create(req_body.into_inner(), &db_pool).await;
 
     match res {
-        Ok(user) => HttpResponse::Ok().json(user),
-        Err(e) => HttpResponse::InternalServerError().json(ErrorMessage {
-            message: format!("Could not create user: {}", e),
-        }),
+        Ok(user) => Ok(HttpResponse::Ok().json(user)),
+        Err(e) => Err(ServiceError::BadRequest(format!("Could not create user: {}", e))),
     }
 }
 
@@ -43,13 +69,10 @@ pub async fn delete(id: web::Path<i64>, db_pool: web::Data<PgPool>) -> impl Resp
     let res = User::delete(id.into_inner(), &db_pool).await;
 
     match res {
-        Ok(0) => HttpResponse::NotFound().json(ErrorMessage {
-            message: "User not found, could not delete.".into(),
-        }),
-        Ok(_) => HttpResponse::NoContent().finish(),
-        Err(e) => HttpResponse::InternalServerError().json(ErrorMessage {
-            message: format!("Could not create user: {}", e),
-        }),
+        Ok(1) => Ok(HttpResponse::NoContent().finish()),
+        Ok(0) => Err(ServiceError::BadRequest("User not found, could not delete.".into())),
+        Err(e) => Err(ServiceError::BadRequest(format!("Could not create user - {}", e))),
+        _ => Err(ServiceError::InternalServerError)
     }
 }
 
@@ -58,4 +81,6 @@ pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(create);
     cfg.service(update);
     cfg.service(delete);
+    cfg.service(login);
+    cfg.service(me);
 }

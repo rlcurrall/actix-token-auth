@@ -2,7 +2,7 @@ pub mod config {
     #[derive(Clone)]
     pub struct Config {
         pub app_key: String,
-        pub app_url: String,
+        pub app_domain: String,
         pub app_secure: bool,
     }
 
@@ -10,7 +10,7 @@ pub mod config {
         pub fn init() -> Self {
             Self {
                 app_key: std::env::var("APP_KEY").expect("APP_KEY not set."),
-                app_url: std::env::var("APP_URL").expect("APP_URL not set."),
+                app_domain: std::env::var("APP_DOMAIN").expect("APP_DOMAIN not set."),
                 app_secure: std::env::var("APP_SECURE")
                     .expect("APP_SECURE not set.")
                     .parse::<bool>()
@@ -33,9 +33,9 @@ pub mod hash {
         .unwrap()
     }
 
-    // pub fn check(hash: String, value: String) -> bool {
-    //     argon2::verify_encoded(hash.as_str(), value.as_bytes()).unwrap()
-    // }
+    pub fn check(hash: String, value: String) -> bool {
+        argon2::verify_encoded(hash.as_str(), value.as_bytes()).unwrap()
+    }
 }
 
 pub mod db {

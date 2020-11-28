@@ -3,7 +3,7 @@ mod models;
 
 use actix_identity::CookieIdentityPolicy;
 use actix_identity::IdentityService;
-use actix_web::{middleware, App, HttpServer};
+use actix_web::{middleware, App, HttpServer, web};
 use dotenv::dotenv;
 use rcs::db;
 use time::Duration;
@@ -22,12 +22,13 @@ async fn main() -> std::io::Result<()> {
             .wrap(middleware::Logger::default())
             .wrap(IdentityService::new(
                 CookieIdentityPolicy::new(config.app_key.as_bytes())
-                    .name("rcs_auth")
+                    .name("auth")
                     .path("/")
-                    .domain(&config.app_url)
+                    .domain(&config.app_domain)
                     .max_age_time(Duration::days(1))
                     .secure(config.app_secure),
             ))
+            .data(web::JsonConfig::default().limit(4096))
             .configure(http::handlers::user_handler::init)
     })
     .bind("127.0.0.1:8080")?
