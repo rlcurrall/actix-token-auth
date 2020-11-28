@@ -1,8 +1,6 @@
 use actix_web::{error::ResponseError, HttpResponse};
 use derive_more::Display;
 use serde::Serialize;
-use std::convert::From;
-use uuid::Error as ParseError;
 
 #[derive(Serialize)]
 struct ErrorMessage {
@@ -39,13 +37,5 @@ impl ResponseError for ServiceError {
                 message: "Unauthorized".into(),
             }),
         }
-    }
-}
-
-// we can return early in our handlers if UUID provided by the user is not valid
-// and provide a custom message
-impl From<ParseError> for ServiceError {
-    fn from(_: ParseError) -> ServiceError {
-        ServiceError::BadRequest("Invalid UUID".into())
     }
 }
