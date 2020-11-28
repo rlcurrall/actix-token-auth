@@ -1,17 +1,13 @@
-use crate::http::errors::ServiceError;
-use crate::models::user::{CreateUser, User};
+use crate::http::{
+    errors::ServiceError,
+    requests::user::{CreateUser, LoginRequest},
+};
+use crate::models::User;
+use crate::utils::hash;
 use actix_identity::Identity;
 use actix_web::web;
 use actix_web::{delete, get, post, put, HttpResponse, Responder};
-use rcs::hash;
-use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-
-#[derive(Serialize, Deserialize)]
-pub struct LoginRequest {
-    pub email: String,
-    pub password: String,
-}
 
 #[get("/user/{id}")]
 pub async fn find(id: web::Path<i64>, db_pool: web::Data<PgPool>) -> impl Responder {
@@ -34,7 +30,7 @@ pub async fn login(
     match res {
         Ok(user) => {
             if hash::check(user.password.clone(), request.password.clone()) {
-                id.remember(serde_json::to_string(&user).unwrap());
+                id.remember(user.id.to_string());
                 return Ok(HttpResponse::Ok().finish());
             }
 

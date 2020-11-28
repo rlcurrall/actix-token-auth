@@ -1,17 +1,18 @@
 mod http;
 mod models;
+mod utils;
 
 use actix_identity::CookieIdentityPolicy;
 use actix_identity::IdentityService;
 use actix_web::{middleware, web, App, HttpServer};
 use dotenv::dotenv;
-use rcs::db;
 use time::Duration;
+use utils::{config, db};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
-    let config = rcs::config::Config::init();
+    let config = config::Config::init();
     env_logger::Builder::new().parse_env("LOG_LEVEL").init();
 
     let db_pool = db::get_connection_pool().await;

@@ -1,13 +1,13 @@
 use crate::http::errors::ServiceError;
+use crate::utils::hash;
 use actix_identity::Identity;
-use actix_web::{dev::Payload, Error, FromRequest, HttpRequest};
+use actix_web::{dev::Payload, web::Data, Error, FromRequest, HttpRequest};
 use chrono::{DateTime, Utc};
-use futures::future::{err, ok, Ready};
-use rcs::hash;
+use futures::prelude::*;
 use serde::{Deserialize, Serialize};
-use serde_json;
 use sqlx::prelude::*;
 use sqlx::{FromRow, PgPool};
+use std::pin::Pin;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateUser {
@@ -114,16 +114,34 @@ impl User {
 impl FromRequest for User {
     type Config = ();
     type Error = Error;
-    type Future = Ready<Result<User, Error>>;
+    type Future = Pin<Box<dyn Future<Output = Result<User, Error>>>>;
 
     fn from_request(req: &HttpRequest, pl: &mut Payload) -> Self::Future {
-        if let Ok(identity) = Identity::from_request(req, pl).into_inner() {
-            if let Some(user_json) = identity.identity() {
-                if let Ok(user) = serde_json::from_str(&user_json) {
-                    return ok(user);
+        let cookie_id = Identity::from_request(req, pl).into_inner();
+        let pool = req.app_data::<Data<PgPool>>().unwrap().clone();
+
+        Box::pin(async move {
+            let identity = match cookie_id {
+                Ok(identity) => identity,
+                Err(_) => return Err(ServiceError::Unauthorized.into()),
+            };
+
+            let id = match identity.identity() {
+                Some(id_str) => id_str.parse::<i64>().unwrap(),
+                None => {
+                    identity.forget();
+                    return Err(ServiceError::Unauthorized.into());
+                }
+            };
+
+            match Self::find(id, &pool).await {
+                Ok(user) => return Ok(user),
+                Err(msg) => {
+                    identity.forget();
+                    log::error!("{}", msg);
+                    return Err(ServiceError::InternalServerError.into());
                 }
             }
-        }
-        err(ServiceError::Unauthorized.into())
+        })
     }
 }
