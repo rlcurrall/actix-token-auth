@@ -1,5 +1,5 @@
-use crate::models::user::{CreateUser, User};
 use crate::http::errors::ServiceError;
+use crate::models::user::{CreateUser, User};
 use actix_identity::Identity;
 use actix_web::web;
 use actix_web::{delete, get, post, put, HttpResponse, Responder};
@@ -38,10 +38,20 @@ pub async fn login(
                 return Ok(HttpResponse::Ok().finish());
             }
 
-            Err(ServiceError::BadRequest("These credentials do not match our records.".into()))
+            Err(ServiceError::BadRequest(
+                "These credentials do not match our records.".into(),
+            ))
         }
-        Err(_) => Err(ServiceError::BadRequest("These credentials do not match our records.".into())),
+        Err(_) => Err(ServiceError::BadRequest(
+            "These credentials do not match our records.".into(),
+        )),
     }
+}
+
+#[get("/logout")]
+pub async fn logout(id: Identity) -> impl Responder {
+    id.forget();
+    HttpResponse::Ok().finish()
 }
 
 #[get("/me")]
@@ -55,7 +65,10 @@ pub async fn create(req_body: web::Json<CreateUser>, db_pool: web::Data<PgPool>)
 
     match res {
         Ok(user) => Ok(HttpResponse::Ok().json(user)),
-        Err(e) => Err(ServiceError::BadRequest(format!("Could not create user: {}", e))),
+        Err(e) => Err(ServiceError::BadRequest(format!(
+            "Could not create user: {}",
+            e
+        ))),
     }
 }
 
@@ -70,9 +83,14 @@ pub async fn delete(id: web::Path<i64>, db_pool: web::Data<PgPool>) -> impl Resp
 
     match res {
         Ok(1) => Ok(HttpResponse::NoContent().finish()),
-        Ok(0) => Err(ServiceError::BadRequest("User not found, could not delete.".into())),
-        Err(e) => Err(ServiceError::BadRequest(format!("Could not create user - {}", e))),
-        _ => Err(ServiceError::InternalServerError)
+        Ok(0) => Err(ServiceError::BadRequest(
+            "User not found, could not delete.".into(),
+        )),
+        Err(e) => Err(ServiceError::BadRequest(format!(
+            "Could not create user - {}",
+            e
+        ))),
+        _ => Err(ServiceError::InternalServerError),
     }
 }
 
@@ -82,5 +100,6 @@ pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(update);
     cfg.service(delete);
     cfg.service(login);
+    cfg.service(logout);
     cfg.service(me);
 }

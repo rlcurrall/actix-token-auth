@@ -1,8 +1,8 @@
 use actix_web::{error::ResponseError, HttpResponse};
 use derive_more::Display;
+use serde::Serialize;
 use std::convert::From;
 use uuid::Error as ParseError;
-use serde::Serialize;
 
 #[derive(Serialize)]
 struct ErrorMessage {
@@ -25,14 +25,19 @@ pub enum ServiceError {
 impl ResponseError for ServiceError {
     fn error_response(&self) -> HttpResponse {
         match self {
-            ServiceError::InternalServerError => HttpResponse::InternalServerError()
-                .json(ErrorMessage { message: "Internal Server Error, Please try later".into()}),
+            ServiceError::InternalServerError => {
+                HttpResponse::InternalServerError().json(ErrorMessage {
+                    message: "Internal Server Error, Please try later".into(),
+                })
+            }
             ServiceError::BadRequest(ref message) => {
-                HttpResponse::BadRequest().json(ErrorMessage { message: message.into() })
+                HttpResponse::BadRequest().json(ErrorMessage {
+                    message: message.into(),
+                })
             }
-            ServiceError::Unauthorized => {
-                HttpResponse::Unauthorized().json(ErrorMessage { message: "Unauthorized".into() })
-            }
+            ServiceError::Unauthorized => HttpResponse::Unauthorized().json(ErrorMessage {
+                message: "Unauthorized".into(),
+            }),
         }
     }
 }

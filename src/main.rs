@@ -3,7 +3,7 @@ mod models;
 
 use actix_identity::CookieIdentityPolicy;
 use actix_identity::IdentityService;
-use actix_web::{middleware, App, HttpServer, web};
+use actix_web::{middleware, web, App, HttpServer};
 use dotenv::dotenv;
 use rcs::db;
 use time::Duration;
