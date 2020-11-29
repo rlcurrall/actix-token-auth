@@ -21,16 +21,11 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            .data(config.clone())
             .data(db_pool.clone())
             .wrap(middleware::Logger::default())
-            .wrap(IdentityService::new(
-                CookieIdentityPolicy::new(config.app_key.as_bytes())
-                    .name("auth")
-                    .path("/")
-                    .domain(&config.app_domain)
-                    .max_age_time(Duration::days(1))
-                    .secure(config.app_secure),
-            ))
+            .wrap(utils::cors::init())
+            .wrap(utils::auth::cookie_auth())
             .data(web::JsonConfig::default().limit(4096))
             .configure(handlers::auth_handler::init)
             .configure(handlers::user_handler::init)

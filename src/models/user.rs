@@ -5,7 +5,7 @@ use actix_web::{dev::Payload, web::Data, Error, FromRequest, HttpRequest};
 use chrono::{DateTime, Utc};
 use futures::prelude::*;
 use serde::{Deserialize, Serialize};
-use sqlx::{FromRow, PgPool, Done};
+use sqlx::{Done, FromRow, PgPool};
 use std::pin::Pin;
 
 #[derive(Debug, Serialize, Deserialize)]

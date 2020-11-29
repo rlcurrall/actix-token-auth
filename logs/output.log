@@ -260,3 +260,78 @@ WHERE
   AND deleted_at ISNULL
 
 [2020-11-29 11:46:15][actix_web::middleware::logger][INFO]127.0.0.1:57645 "GET /me HTTP/1.1" 200 153 "-" "PostmanRuntime/7.26.8" 0.010363
+[2020-11-29 12:12:51][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 12:13:03][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 12:13:03][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 12:13:26][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 12:13:37][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 12:13:37][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 12:13:49][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 12:14:00][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 12:14:00][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 12:14:23][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 12:14:32][rcs][ERROR]Config: APP_CONFIG {
+    __private_field: (),
+}
+[2020-11-29 12:14:32][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 12:14:32][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 12:22:38][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 12:22:50][rcs][ERROR]Config: "L95FqymVpvBJIdYrKDJeUAFeAX4BwDqP"
+[2020-11-29 12:22:50][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 12:22:50][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 12:23:45][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 12:23:57][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 12:23:57][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 12:23:57][rcs::http::handlers::auth_handler][ERROR]Config: "L95FqymVpvBJIdYrKDJeUAFeAX4BwDqP"
+[2020-11-29 12:23:57][rcs::http::handlers::auth_handler][ERROR]Config: "L95FqymVpvBJIdYrKDJeUAFeAX4BwDqP"
+[2020-11-29 12:23:57][rcs::http::handlers::auth_handler][ERROR]Config: "L95FqymVpvBJIdYrKDJeUAFeAX4BwDqP"
+[2020-11-29 12:23:57][rcs::http::handlers::auth_handler][ERROR]Config: "L95FqymVpvBJIdYrKDJeUAFeAX4BwDqP"
+[2020-11-29 12:23:57][rcs::http::handlers::auth_handler][ERROR]Config: "L95FqymVpvBJIdYrKDJeUAFeAX4BwDqP"
+[2020-11-29 12:23:57][rcs::http::handlers::auth_handler][ERROR]Config: "L95FqymVpvBJIdYrKDJeUAFeAX4BwDqP"
+[2020-11-29 12:23:57][rcs::http::handlers::auth_handler][ERROR]Config: "L95FqymVpvBJIdYrKDJeUAFeAX4BwDqP"
+[2020-11-29 12:23:57][rcs::http::handlers::auth_handler][ERROR]Config: "L95FqymVpvBJIdYrKDJeUAFeAX4BwDqP"
+[2020-11-29 12:24:55][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 12:30:03][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 12:30:03][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 12:30:33][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 12:30:42][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 12:30:42][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 12:30:49][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 12:31:32][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 12:31:32][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 12:32:00][sqlx::query][INFO]/* SQLx ping */; rows: 0, elapsed: 3.125ms
+[2020-11-29 12:32:00][sqlx::query][INFO]SELECT * FROM users …; rows: 1, elapsed: 5.270ms
+
+SELECT
+  *
+FROM
+  users
+WHERE
+  email = $1
+  AND deleted_at ISNULL
+
+[2020-11-29 12:32:00][actix_web::middleware::logger][INFO]127.0.0.1:60381 "POST /login HTTP/1.1" 200 0 "-" "PostmanRuntime/7.26.8" 0.365998
+[2020-11-29 12:32:09][sqlx::query][INFO]/* SQLx ping */; rows: 0, elapsed: 2.993ms
+[2020-11-29 12:32:09][sqlx::query][INFO]SELECT * FROM users …; rows: 1, elapsed: 8.508ms
+
+SELECT
+  *
+FROM
+  users
+WHERE
+  id = $1
+  AND deleted_at ISNULL
+
+[2020-11-29 12:32:09][actix_web::middleware::logger][INFO]127.0.0.1:60382 "GET /me HTTP/1.1" 200 153 "-" "PostmanRuntime/7.26.8" 0.014112
+[2020-11-29 12:32:18][sqlx::query][INFO]/* SQLx ping */; rows: 0, elapsed: 2.842ms
+[2020-11-29 12:32:18][sqlx::query][INFO]SELECT * FROM users …; rows: 1, elapsed: 1.999ms
+
+SELECT
+  *
+FROM
+  users
+WHERE
+  id = $1
+  AND deleted_at ISNULL
+
+[2020-11-29 12:32:18][actix_web::middleware::logger][INFO]127.0.0.1:60383 "GET /me HTTP/1.1" 200 153 "-" "PostmanRuntime/7.26.8" 0.007084
