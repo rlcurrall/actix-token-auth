@@ -6,6 +6,7 @@ use actix_identity::CookieIdentityPolicy;
 use actix_identity::IdentityService;
 use actix_web::{middleware, web, App, HttpServer};
 use dotenv::dotenv;
+use http::handlers;
 use time::Duration;
 use utils::{config, db};
 
@@ -13,7 +14,8 @@ use utils::{config, db};
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
     let config = config::Config::init();
-    env_logger::Builder::new().parse_env("LOG_LEVEL").init();
+
+    utils::log::init_logger().expect("Failed to initialize logger.");
 
     let db_pool = db::get_connection_pool().await;
 
@@ -30,7 +32,8 @@ async fn main() -> std::io::Result<()> {
                     .secure(config.app_secure),
             ))
             .data(web::JsonConfig::default().limit(4096))
-            .configure(http::handlers::user_handler::init)
+            .configure(handlers::auth_handler::init)
+            .configure(handlers::user_handler::init)
     })
     .bind("127.0.0.1:8080")?
     .run()

@@ -1,0 +1,262 @@
+[2020-11-29][11:11:35][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29][11:11:35][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29][11:12:36][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 11:12:44][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 11:12:44][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 11:14:17][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 11:14:29][rcs][DEBUG]Here is debug
+[2020-11-29 11:14:29][rcs][INFO]Here is info
+[2020-11-29 11:14:29][rcs][WARN]Here is warn
+[2020-11-29 11:14:29][rcs][ERROR]Here is error
+[2020-11-29 11:14:29][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 11:14:29][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 11:32:29][sqlx::query][INFO]/* SQLx ping */; rows: 0, elapsed: 1.953ms
+[2020-11-29 11:32:29][sqlx::query][INFO]SELECT * FROM users …; rows: 1, elapsed: 14.221ms
+
+SELECT
+  *
+FROM
+  users
+WHERE
+  id = $1
+  AND deleted_at ISNULL
+
+[2020-11-29 11:32:29][actix_web::middleware::logger][INFO]127.0.0.1:56781 "GET /me HTTP/1.1" 200 153 "-" "PostmanRuntime/7.26.8" 0.020165
+[2020-11-29 11:37:38][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 11:37:50][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 11:37:50][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 11:38:13][sqlx::query][INFO]/* SQLx ping */; rows: 0, elapsed: 2.162ms
+[2020-11-29 11:38:13][sqlx::query][INFO]SELECT * FROM users …; rows: 1, elapsed: 11.401ms
+
+SELECT
+  *
+FROM
+  users
+WHERE
+  id = $1
+  AND deleted_at ISNULL
+
+[2020-11-29 11:38:13][actix_web::middleware::logger][INFO]127.0.0.1:57571 "GET /me HTTP/1.1" 200 153 "-" "PostmanRuntime/7.26.8" 0.017496
+[2020-11-29 11:38:17][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on()
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on()
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on()
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on()
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on()
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on()
+[2020-11-29 11:43:29][async_std::task::builder][TRACE]spawn
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on()
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on()
+[2020-11-29 11:43:29][polling::kqueue][TRACE]new: kqueue_fd=7, read_stream=UnixStream { fd: 8, local: (unnamed), peer: (unnamed) }
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on: notified
+[2020-11-29 11:43:29][async_std::task::builder][TRACE]spawn
+[2020-11-29 11:43:29][polling][TRACE]Poller::notify()
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on: sleep until notification
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on: sleep until notification
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on: waiting on I/O
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on: sleep until notification
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: sleeping for 50 us
+[2020-11-29 11:43:29][async_io::reactor][TRACE]process_timers: 0 ready wakers
+[2020-11-29 11:43:29][polling][TRACE]Poller::notify()
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on: sleep until notification
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: sleeping for 75 us
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on: sleep until notification
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on: sleep until notification
+[2020-11-29 11:43:29][polling::kqueue][TRACE]notify: kqueue_fd=7
+[2020-11-29 11:43:29][polling][TRACE]Poller::wait(_, Some(29.997657058s))
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on: sleep until notification
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: sleeping for 100 us
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on: sleep until notification
+[2020-11-29 11:43:29][polling::kqueue][TRACE]wait: kqueue_fd=7, timeout=Some(29.997657058s)
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on: sleep until notification
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: sleeping for 250 us
+[2020-11-29 11:43:29][polling::kqueue][TRACE]new events: kqueue_fd=7, res=1
+[2020-11-29 11:43:29][async_io::reactor][TRACE]process_timers: 0 ready wakers
+[2020-11-29 11:43:29][polling::kqueue][TRACE]add: kqueue_fd=7, fd=18, ev=Event { key: 0, readable: false, writable: false }
+[2020-11-29 11:43:29][async_io::reactor][TRACE]react: 0 ready wakers
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: sleeping for 500 us
+[2020-11-29 11:43:29][polling::kqueue][TRACE]add: kqueue_fd=7, fd=18, ev=Event { key: 0, readable: false, writable: true }
+[2020-11-29 11:43:29][async_io::driver][TRACE]block_on: stops hogging the reactor
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: notified
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: waiting on I/O
+[2020-11-29 11:43:29][async_io::reactor][TRACE]process_timers: 0 ready wakers
+[2020-11-29 11:43:29][polling][TRACE]Poller::wait(_, Some(29.995660991s))
+[2020-11-29 11:43:29][polling::kqueue][TRACE]wait: kqueue_fd=7, timeout=Some(29.995660991s)
+[2020-11-29 11:43:29][polling::kqueue][TRACE]new events: kqueue_fd=7, res=1
+[2020-11-29 11:43:29][async_io::reactor][TRACE]react: 1 ready wakers
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: sleeping for 50 us
+[2020-11-29 11:43:29][async_io::reactor][TRACE]writable: fd=18
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: waiting on I/O
+[2020-11-29 11:43:29][async_io::reactor][TRACE]process_timers: 0 ready wakers
+[2020-11-29 11:43:29][polling::kqueue][TRACE]add: kqueue_fd=7, fd=18, ev=Event { key: 0, readable: true, writable: false }
+[2020-11-29 11:43:29][polling][TRACE]Poller::wait(_, Some(29.993681632s))
+[2020-11-29 11:43:29][polling::kqueue][TRACE]wait: kqueue_fd=7, timeout=Some(29.993681632s)
+[2020-11-29 11:43:29][polling::kqueue][TRACE]new events: kqueue_fd=7, res=1
+[2020-11-29 11:43:29][async_io::reactor][TRACE]react: 1 ready wakers
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: sleeping for 50 us
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: waiting on I/O
+[2020-11-29 11:43:29][async_io::reactor][TRACE]process_timers: 0 ready wakers
+[2020-11-29 11:43:29][polling::kqueue][TRACE]add: kqueue_fd=7, fd=18, ev=Event { key: 0, readable: true, writable: false }
+[2020-11-29 11:43:29][polling][TRACE]Poller::wait(_, Some(29.990461139s))
+[2020-11-29 11:43:29][polling::kqueue][TRACE]wait: kqueue_fd=7, timeout=Some(29.990461139s)
+[2020-11-29 11:43:29][polling::kqueue][TRACE]new events: kqueue_fd=7, res=1
+[2020-11-29 11:43:29][async_io::reactor][TRACE]react: 1 ready wakers
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: sleeping for 50 us
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: waiting on I/O
+[2020-11-29 11:43:29][polling::kqueue][TRACE]add: kqueue_fd=7, fd=18, ev=Event { key: 0, readable: true, writable: false }
+[2020-11-29 11:43:29][async_io::reactor][TRACE]process_timers: 0 ready wakers
+[2020-11-29 11:43:29][polling][TRACE]Poller::wait(_, Some(29.98718693s))
+[2020-11-29 11:43:29][polling::kqueue][TRACE]wait: kqueue_fd=7, timeout=Some(29.98718693s)
+[2020-11-29 11:43:29][polling::kqueue][TRACE]new events: kqueue_fd=7, res=1
+[2020-11-29 11:43:29][async_io::reactor][TRACE]react: 1 ready wakers
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: sleeping for 50 us
+[2020-11-29 11:43:29][async_io::driver][TRACE]main_loop: waiting on I/O
+[2020-11-29 11:43:29][async_io::reactor][TRACE]process_timers: 0 ready wakers
+[2020-11-29 11:43:29][polling][TRACE]Poller::wait(_, Some(599.983867177s))
+[2020-11-29 11:43:29][polling::kqueue][TRACE]wait: kqueue_fd=7, timeout=Some(599.983867177s)
+[2020-11-29 11:43:29][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(18446744073709551615); interests=Readable
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(18446744073709551615); interests=Readable
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(18446744073709551615); interests=Readable
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(18446744073709551615); interests=Readable
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(18446744073709551615); interests=Readable
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(18446744073709551615); interests=Readable
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(18446744073709551615); interests=Readable
+[2020-11-29 11:43:29][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(18446744073709551615); interests=Readable
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(18446744073709551615); interests=Readable
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(0); interests=Readable | Writable | Error | Hup
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][actix_web::middleware::logger][TRACE]Access log format: %a "%r" %s %b "%{Referer}i" "%{User-Agent}i" %T
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(1); interests=Readable | Writable | Error | Hup
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(100); interests=Readable
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(2); interests=Readable | Writable | Error | Hup
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:29][mio::sys::unix::kqueue][TRACE]registering; token=Token(3); interests=Readable | Writable | Error | Hup
+[2020-11-29 11:43:29][actix_web::middleware::logger][TRACE]Access log format: %a "%r" %s %b "%{Referer}i" "%{User-Agent}i" %T
+[2020-11-29 11:43:29][actix_server::worker][TRACE]Service "actix-web-service-127.0.0.1:8080" is available
+[2020-11-29 11:43:29][actix_web::middleware::logger][TRACE]Access log format: %a "%r" %s %b "%{Referer}i" "%{User-Agent}i" %T
+[2020-11-29 11:43:29][actix_server::worker][TRACE]Service "actix-web-service-127.0.0.1:8080" is available
+[2020-11-29 11:43:29][actix_web::middleware::logger][TRACE]Access log format: %a "%r" %s %b "%{Referer}i" "%{User-Agent}i" %T
+[2020-11-29 11:43:29][actix_server::worker][TRACE]Service "actix-web-service-127.0.0.1:8080" is available
+[2020-11-29 11:43:29][actix_web::middleware::logger][TRACE]Access log format: %a "%r" %s %b "%{Referer}i" "%{User-Agent}i" %T
+[2020-11-29 11:43:29][actix_server::worker][TRACE]Service "actix-web-service-127.0.0.1:8080" is available
+[2020-11-29 11:43:29][actix_web::middleware::logger][TRACE]Access log format: %a "%r" %s %b "%{Referer}i" "%{User-Agent}i" %T
+[2020-11-29 11:43:29][actix_server::worker][TRACE]Service "actix-web-service-127.0.0.1:8080" is available
+[2020-11-29 11:43:29][actix_web::middleware::logger][TRACE]Access log format: %a "%r" %s %b "%{Referer}i" "%{User-Agent}i" %T
+[2020-11-29 11:43:29][actix_server::worker][TRACE]Service "actix-web-service-127.0.0.1:8080" is available
+[2020-11-29 11:43:29][actix_web::middleware::logger][TRACE]Access log format: %a "%r" %s %b "%{Referer}i" "%{User-Agent}i" %T
+[2020-11-29 11:43:29][actix_server::worker][TRACE]Service "actix-web-service-127.0.0.1:8080" is available
+[2020-11-29 11:43:29][actix_server::worker][TRACE]Service "actix-web-service-127.0.0.1:8080" is available
+[2020-11-29 11:43:45][mio::poll][TRACE]registering with poller
+[2020-11-29 11:43:45][mio::sys::unix::kqueue][TRACE]registering; token=Token(0); interests=Readable | Writable | Error | Hup
+[2020-11-29 11:43:45][polling::kqueue][TRACE]add: kqueue_fd=7, fd=18, ev=Event { key: 0, readable: true, writable: false }
+[2020-11-29 11:43:45][actix_http::h1::decoder][TRACE]Length read: 60
+[2020-11-29 11:43:45][polling::kqueue][TRACE]new events: kqueue_fd=7, res=1
+[2020-11-29 11:43:45][async_io::reactor][TRACE]react: 1 ready wakers
+[2020-11-29 11:43:45][async_io::driver][TRACE]main_loop: sleeping for 50 us
+[2020-11-29 11:43:45][async_io::driver][TRACE]main_loop: waiting on I/O
+[2020-11-29 11:43:45][async_io::reactor][TRACE]process_timers: 0 ready wakers
+[2020-11-29 11:43:45][sqlx::query][INFO]/* SQLx ping */; rows: 0, elapsed: 5.245ms
+[2020-11-29 11:43:45][polling][TRACE]Poller::wait(_, Some(584.4472077s))
+[2020-11-29 11:43:45][polling::kqueue][TRACE]wait: kqueue_fd=7, timeout=Some(584.4472077s)
+[2020-11-29 11:43:45][polling::kqueue][TRACE]add: kqueue_fd=7, fd=18, ev=Event { key: 0, readable: true, writable: false }
+[2020-11-29 11:43:45][polling::kqueue][TRACE]new events: kqueue_fd=7, res=1
+[2020-11-29 11:43:45][async_io::reactor][TRACE]react: 1 ready wakers
+[2020-11-29 11:43:45][async_io::driver][TRACE]main_loop: sleeping for 50 us
+[2020-11-29 11:43:45][async_io::driver][TRACE]main_loop: waiting on I/O
+[2020-11-29 11:43:45][polling::kqueue][TRACE]add: kqueue_fd=7, fd=18, ev=Event { key: 0, readable: true, writable: false }
+[2020-11-29 11:43:45][async_io::reactor][TRACE]process_timers: 0 ready wakers
+[2020-11-29 11:43:45][polling][TRACE]Poller::wait(_, Some(584.438022772s))
+[2020-11-29 11:43:45][polling::kqueue][TRACE]wait: kqueue_fd=7, timeout=Some(584.438022772s)
+[2020-11-29 11:43:45][polling::kqueue][TRACE]new events: kqueue_fd=7, res=1
+[2020-11-29 11:43:45][async_io::reactor][TRACE]react: 1 ready wakers
+[2020-11-29 11:43:45][async_io::driver][TRACE]main_loop: sleeping for 50 us
+[2020-11-29 11:43:45][async_io::driver][TRACE]main_loop: waiting on I/O
+[2020-11-29 11:43:45][async_io::reactor][TRACE]process_timers: 0 ready wakers
+[2020-11-29 11:43:45][polling][TRACE]Poller::wait(_, Some(584.437217286s))
+[2020-11-29 11:43:45][polling::kqueue][TRACE]wait: kqueue_fd=7, timeout=Some(584.437217286s)
+[2020-11-29 11:43:45][sqlx::query][INFO]SELECT * FROM users …; rows: 1, elapsed: 9.627ms
+
+SELECT
+  *
+FROM
+  users
+WHERE
+  id = $1
+  AND deleted_at ISNULL
+
+[2020-11-29 11:43:45][actix_web::middleware::logger][INFO]127.0.0.1:57630 "GET /me HTTP/1.1" 200 153 "-" "PostmanRuntime/7.26.8" 0.021664
+[2020-11-29 11:43:50][actix_http::h1::dispatcher][TRACE]Keep-alive timeout, close connection
+[2020-11-29 11:43:50][mio::poll][TRACE]deregistering handle with poller
+[2020-11-29 11:44:14][actix_server::builder][INFO]SIGINT received, exiting
+[2020-11-29 11:44:14][mio::poll][TRACE]deregistering handle with poller
+[2020-11-29 11:44:14][mio::poll][TRACE]deregistering handle with poller
+[2020-11-29 11:44:14][mio::poll][TRACE]deregistering handle with poller
+[2020-11-29 11:44:14][mio::poll][TRACE]deregistering handle with poller
+[2020-11-29 11:44:14][mio::poll][TRACE]deregistering handle with poller
+[2020-11-29 11:44:48][actix_server::builder][INFO]Starting 8 workers
+[2020-11-29 11:44:48][actix_server::builder][INFO]Starting "actix-web-service-127.0.0.1:8080" service on 127.0.0.1:8080
+[2020-11-29 11:44:52][sqlx::query][INFO]/* SQLx ping */; rows: 0, elapsed: 3.689ms
+[2020-11-29 11:44:52][sqlx::query][INFO]SELECT * FROM users …; rows: 1, elapsed: 14.934ms
+
+SELECT
+  *
+FROM
+  users
+WHERE
+  id = $1
+  AND deleted_at ISNULL
+
+[2020-11-29 11:44:52][actix_web::middleware::logger][INFO]127.0.0.1:57637 "GET /me HTTP/1.1" 200 153 "-" "PostmanRuntime/7.26.8" 0.023919
+[2020-11-29 11:45:07][sqlx::query][INFO]/* SQLx ping */; rows: 0, elapsed: 2.649ms
+[2020-11-29 11:45:07][sqlx::query][INFO]SELECT * FROM users …; rows: 1, elapsed: 3.973ms
+
+SELECT
+  *
+FROM
+  users
+WHERE
+  id = $1
+  AND deleted_at ISNULL
+
+[2020-11-29 11:45:07][actix_web::middleware::logger][INFO]127.0.0.1:57639 "GET /me HTTP/1.1" 200 153 "-" "PostmanRuntime/7.26.8" 0.010219
+[2020-11-29 11:45:50][actix_web::middleware::logger][INFO]127.0.0.1:57642 "GET /logout HTTP/1.1" 200 0 "-" "PostmanRuntime/7.26.8" 0.000279
+[2020-11-29 11:46:07][sqlx::query][INFO]/* SQLx ping */; rows: 0, elapsed: 2.447ms
+[2020-11-29 11:46:07][sqlx::query][INFO]SELECT * FROM users …; rows: 1, elapsed: 3.716ms
+
+SELECT
+  *
+FROM
+  users
+WHERE
+  email = $1
+  AND deleted_at ISNULL
+
+[2020-11-29 11:46:08][actix_web::middleware::logger][INFO]127.0.0.1:57643 "POST /login HTTP/1.1" 200 0 "-" "PostmanRuntime/7.26.8" 0.350734
+[2020-11-29 11:46:15][sqlx::query][INFO]/* SQLx ping */; rows: 0, elapsed: 3.887ms
+[2020-11-29 11:46:15][sqlx::query][INFO]SELECT * FROM users …; rows: 1, elapsed: 3.516ms
+
+SELECT
+  *
+FROM
+  users
+WHERE
+  id = $1
+  AND deleted_at ISNULL
+
+[2020-11-29 11:46:15][actix_web::middleware::logger][INFO]127.0.0.1:57645 "GET /me HTTP/1.1" 200 153 "-" "PostmanRuntime/7.26.8" 0.010363

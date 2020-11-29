@@ -32,32 +32,28 @@ pub enum ServiceError {
 impl ResponseError for ServiceError {
     fn error_response(&self) -> HttpResponse {
         match self {
-            ServiceError::InternalServerError(ref message) => {
-                HttpResponse::InternalServerError().json(ErrorMessage {
+            ServiceError::InternalServerError(ref message) => HttpResponse::InternalServerError()
+                .json(ErrorMessage {
                     message: message.to_string(),
-                })
-            },
+                }),
             ServiceError::BadRequest(ref message) => {
                 HttpResponse::BadRequest().json(ErrorMessage {
                     message: message.to_string(),
                 })
-            },
+            }
             ServiceError::Unauthorized => HttpResponse::Unauthorized().json(ErrorMessage {
                 message: "Unauthorized".into(),
             }),
             ServiceError::Forbidden => HttpResponse::Forbidden().json(ErrorMessage {
                 message: "Forbidden".into(),
             }),
-            ServiceError::NotFound(ref message) => {
-                HttpResponse::NotFound().json(ErrorMessage {
+            ServiceError::NotFound(ref message) => HttpResponse::NotFound().json(ErrorMessage {
+                message: message.to_string(),
+            }),
+            ServiceError::UnprocessableEntity(ref message) => HttpResponse::UnprocessableEntity()
+                .json(ErrorMessage {
                     message: message.to_string(),
-                })
-            },
-            ServiceError::UnprocessableEntity(ref message) => {
-                HttpResponse::UnprocessableEntity().json(ErrorMessage {
-                    message: message.to_string(),
-                })
-            },
+                }),
         }
     }
 }

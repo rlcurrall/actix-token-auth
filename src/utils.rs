@@ -55,3 +55,33 @@ pub mod db {
             .expect("Could not get database connection pool.")
     }
 }
+
+pub mod log {
+    pub fn init_logger() -> Result<(), fern::InitError> {
+        let level = match std::env::var("LOG_LEVEL").unwrap_or("error".into()).as_str() {
+            "trace" => log::LevelFilter::Trace,
+            "debug" => log::LevelFilter::Debug,
+            "info" => log::LevelFilter::Info,
+            "warn" => log::LevelFilter::Warn,
+            "error" => log::LevelFilter::Error,
+            _ => log::LevelFilter::Error,
+        };
+
+        fern::Dispatch::new()
+            .format(|out, msg, record| {
+                out.finish(format_args!(
+                    "{}[{}][{}]{}",
+                    chrono::Local::now().format("[%Y-%m-%d %H:%M:%S]"),
+                    record.target(),
+                    record.level(),
+                    msg
+                ))
+            })
+            .level(level)
+            .chain(std::io::stdout())
+            .chain(fern::log_file("logs/output.log")?)
+            .apply()?;
+
+        Ok(())
+    }
+}
