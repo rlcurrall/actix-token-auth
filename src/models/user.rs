@@ -135,11 +135,11 @@ impl FromRequest for User {
             };
 
             match Self::find(id, &pool).await {
-                Ok(user) => return Ok(user),
+                Ok(user) => Ok(user),
                 Err(msg) => {
                     identity.forget();
                     log::error!("{}", msg);
-                    return Err(ServiceError::InternalServerError("".into()).into());
+                    Err(ServiceError::InternalServerError("".into()).into())
                 }
             }
         })

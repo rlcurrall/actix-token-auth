@@ -82,10 +82,9 @@ pub async fn delete(id: web::Path<i64>, db_pool: web::Data<PgPool>) -> impl Resp
         Ok(0) => Err(ServiceError::BadRequest(
             "User not found, could not delete.".into(),
         )),
-        Err(e) => Err(ServiceError::BadRequest(format!(
-            "Could not create user - {}",
-            e
-        ))),
+        Err(e) => Err(ServiceError::BadRequest(
+            format!("Could not create user - {}", e),
+        )),
         _ => Err(ServiceError::InternalServerError("".into())),
     }
 }
