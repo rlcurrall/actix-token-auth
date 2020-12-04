@@ -1,13 +1,11 @@
-mod http;
+mod errors;
+mod handlers;
 mod models;
+mod requests;
 mod utils;
 
-use actix_identity::CookieIdentityPolicy;
-use actix_identity::IdentityService;
 use actix_web::{middleware, web, App, HttpServer};
 use dotenv::dotenv;
-use http::handlers;
-use time::Duration;
 use utils::{config, db};
 
 #[actix_web::main]
@@ -27,8 +25,9 @@ async fn main() -> std::io::Result<()> {
             .wrap(utils::cors::init())
             .wrap(utils::auth::cookie_auth())
             .data(web::JsonConfig::default().limit(4096))
-            .configure(handlers::auth_handler::init)
             .configure(handlers::user_handler::init)
+            .configure(handlers::cookie_handler::init)
+            .configure(handlers::token_handler::init)
     })
     .bind("127.0.0.1:8080")?
     .run()

@@ -8,6 +8,7 @@ struct ErrorMessage {
 }
 
 #[derive(Debug, Display)]
+#[allow(dead_code)]
 pub enum ServiceError {
     #[display(fmt = "Internal Server Error - {}", _0)]
     InternalServerError(String),

@@ -1,27 +1,11 @@
-use crate::http::errors::ServiceError;
-use crate::http::requests::user::{CreateUser, LoginRequest};
-use crate::models::User;
-use crate::utils::hash;
+use crate::{errors::ServiceError, models::User, requests::user::LoginRequest, utils::hash};
 use actix_identity::Identity;
 use actix_web::{
     get, post,
-    web::{Data, Json, ServiceConfig},
+    web::{self, Data, Json, ServiceConfig},
     HttpResponse, Responder,
 };
 use sqlx::postgres::PgPool;
-
-#[post("/register")]
-pub async fn register(req_body: Json<CreateUser>, db_pool: Data<PgPool>) -> impl Responder {
-    let res = User::create(req_body.into_inner(), &db_pool).await;
-
-    match res {
-        Ok(user) => Ok(HttpResponse::Ok().json(user)),
-        Err(e) => Err(ServiceError::BadRequest(format!(
-            "Could not create user - {}",
-            e
-        ))),
-    }
-}
 
 #[post("/login")]
 pub async fn login(
@@ -60,8 +44,10 @@ pub async fn me(me: User) -> impl Responder {
 }
 
 pub fn init(cfg: &mut ServiceConfig) {
-    cfg.service(register);
-    cfg.service(login);
-    cfg.service(logout);
-    cfg.service(me);
+    cfg.service(
+        web::scope("/cookie")
+            .service(login)
+            .service(logout)
+            .service(me),
+    );
 }

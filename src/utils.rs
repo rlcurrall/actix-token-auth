@@ -31,6 +31,8 @@ pub mod config {
         pub app_domain: String,
         pub app_secure: bool,
         pub app_debug: bool,
+        pub cors_origins: String,
+        pub cors_methods: String,
     }
 
     impl Config {
@@ -46,6 +48,8 @@ pub mod config {
                     .unwrap_or("false".into())
                     .parse::<bool>()
                     .unwrap(),
+                cors_origins: std::env::var("CORS_ORIGINS").unwrap_or("localhost".into()),
+                cors_methods: std::env::var("CORS_METHODS").unwrap_or("GET".into()),
             }
         }
     }
@@ -53,11 +57,26 @@ pub mod config {
 
 pub mod cors {
     pub fn init() -> actix_cors::Cors {
-        actix_cors::Cors::default()
-            .allowed_methods(vec!["GET", "POST", "PUT", "PATCH", "DELETE", "OPTION"])
-            .allowed_origin_fn(|origin, _req_head| origin.as_bytes().ends_with(b"asdf.test"))
-            .max_age(3006)
+        let policy = actix_cors::Cors::default()
             .supports_credentials()
+            .allowed_methods(
+                // This doesn't appear to do anything...
+                super::config::APP_CONFIG
+                    .cors_methods
+                    .split(",")
+                    .collect::<Vec<&str>>(),
+            )
+            .allowed_origin_fn(move |origin, _req_head| {
+                super::config::APP_CONFIG
+                    .cors_origins
+                    .split(",")
+                    .collect::<Vec<&str>>()
+                    .iter()
+                    .map(|d| origin.as_bytes().ends_with(d.as_bytes()))
+                    .fold(false, |acc, x| x || acc)
+            });
+
+        policy
     }
 }
 

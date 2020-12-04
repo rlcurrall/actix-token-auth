@@ -1,11 +1,23 @@
-use crate::http::{errors::ServiceError, requests::user::CreateUser as UpdateUser};
-use crate::models::User;
+use crate::{errors::ServiceError, models::User, requests::user::CreateUser};
 use actix_web::{
-    delete, get, put,
+    delete, get, put, post,
     web::{Data, Json, Path, ServiceConfig},
     HttpResponse, Responder,
 };
 use sqlx::PgPool;
+
+#[post("/register")]
+pub async fn register(req_body: Json<CreateUser>, db_pool: Data<PgPool>) -> impl Responder {
+    let res = User::create(req_body.into_inner(), &db_pool).await;
+
+    match res {
+        Ok(user) => Ok(HttpResponse::Ok().json(user)),
+        Err(e) => Err(ServiceError::BadRequest(format!(
+            "Could not create user - {}",
+            e
+        ))),
+    }
+}
 
 #[get("/user/{id}")]
 pub async fn find(id: Path<i64>, db_pool: Data<PgPool>) -> impl Responder {
@@ -18,7 +30,7 @@ pub async fn find(id: Path<i64>, db_pool: Data<PgPool>) -> impl Responder {
 }
 
 #[put("/user/{id}")]
-pub async fn update(_id: Path<i64>, req_body: Json<UpdateUser>) -> impl Responder {
+pub async fn update(_id: Path<i64>, req_body: Json<CreateUser>) -> impl Responder {
     HttpResponse::Ok().json(req_body.into_inner())
 }
 
@@ -40,6 +52,7 @@ pub async fn delete(id: Path<i64>, db_pool: Data<PgPool>) -> impl Responder {
 }
 
 pub fn init(cfg: &mut ServiceConfig) {
+    cfg.service(register);
     cfg.service(find);
     cfg.service(update);
     cfg.service(delete);
