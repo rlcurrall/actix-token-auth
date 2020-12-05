@@ -1,5 +1,7 @@
 # Project Specific files
 .env
+logs/*
+!logs/.gitkeep
 
 # Easily hide/untrack files/folders by adding underscore to front
 _*
