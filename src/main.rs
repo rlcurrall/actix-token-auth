@@ -15,15 +15,15 @@ async fn main() -> std::io::Result<()> {
 
     utils::log::init_logger().expect("Failed to initialize logger.");
 
-    let db_pool = db::get_connection_pool().await;
+    let db_pool = db::get_connection_pool(config.clone()).await;
 
     HttpServer::new(move || {
         App::new()
             .data(config.clone())
             .data(db_pool.clone())
             .wrap(middleware::Logger::default())
-            .wrap(utils::cors::init())
-            .wrap(utils::auth::cookie_auth())
+            .wrap(utils::cors::init(config.clone()))
+            .wrap(utils::auth::cookie_auth(config.clone()))
             .data(web::JsonConfig::default().limit(4096))
             .configure(handlers::user_handler::init)
             .configure(handlers::cookie_handler::init)

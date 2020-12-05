@@ -2,28 +2,20 @@ pub mod auth {
     use actix_identity::{CookieIdentityPolicy, IdentityService};
     use time::Duration;
 
-    pub fn cookie_auth() -> IdentityService<CookieIdentityPolicy> {
-        let key = super::config::APP_CONFIG.app_key.clone();
-        let domain = super::config::APP_CONFIG.app_domain.clone();
-        let secure = super::config::APP_CONFIG.app_secure;
-
+    pub fn cookie_auth(config: super::config::Config) -> IdentityService<CookieIdentityPolicy> {
         IdentityService::new(
-            CookieIdentityPolicy::new(key.as_bytes())
+            CookieIdentityPolicy::new(config.app_key.clone().as_bytes())
                 .name("auth")
                 .path("/")
-                .domain(domain)
+                .domain(config.app_domain.clone())
                 .max_age_time(Duration::days(1))
-                .secure(secure),
+                .secure(config.app_secure.clone()),
         )
     }
 }
 
 pub mod config {
-    use lazy_static::lazy_static;
-
-    lazy_static! {
-        pub static ref APP_CONFIG: Config = Config::init();
-    }
+    use std::env;
 
     #[derive(Clone, Debug)]
     pub struct Config {
@@ -31,46 +23,48 @@ pub mod config {
         pub app_domain: String,
         pub app_secure: bool,
         pub app_debug: bool,
-        pub cors_origins: String,
-        pub cors_methods: String,
+        pub cors_methods: Vec<String>,
+        pub cors_origins: Vec<String>,
+        pub db_url: String,
     }
 
     impl Config {
         pub fn init() -> Self {
             Self {
-                app_key: std::env::var("APP_KEY").expect("APP_KEY not set."),
-                app_domain: std::env::var("APP_DOMAIN").expect("APP_DOMAIN not set."),
-                app_secure: std::env::var("APP_SECURE")
+                app_key: env::var("APP_KEY").expect("APP_KEY not set."),
+                app_domain: env::var("APP_DOMAIN").expect("APP_DOMAIN not set."),
+                app_secure: env::var("APP_SECURE")
                     .expect("APP_SECURE not set.")
                     .parse::<bool>()
                     .unwrap(),
-                app_debug: std::env::var("APP_DEBUG")
+                app_debug: env::var("APP_DEBUG")
                     .unwrap_or("false".into())
                     .parse::<bool>()
                     .unwrap(),
-                cors_origins: std::env::var("CORS_ORIGINS").unwrap_or("localhost".into()),
-                cors_methods: std::env::var("CORS_METHODS").unwrap_or("GET".into()),
+                cors_methods: env::var("CORS_METHODS")
+                    .unwrap_or("GET".into())
+                    .split(",")
+                    .map(|x| x.into())
+                    .collect(),
+                cors_origins: env::var("CORS_ORIGINS")
+                    .unwrap_or("localhost".into())
+                    .split(",")
+                    .map(|x| x.into())
+                    .collect(),
+                db_url: env::var("DATABASE_URL").expect("DATABASE_URL is not set."),
             }
         }
     }
 }
 
 pub mod cors {
-    pub fn init() -> actix_cors::Cors {
+    pub fn init(config: super::config::Config) -> actix_cors::Cors {
         let policy = actix_cors::Cors::default()
             .supports_credentials()
-            .allowed_methods(
-                // This doesn't appear to do anything...
-                super::config::APP_CONFIG
-                    .cors_methods
-                    .split(",")
-                    .collect::<Vec<&str>>(),
-            )
+            .allowed_methods(config.cors_methods.iter().map(|x| x.as_str()))
             .allowed_origin_fn(move |origin, _req_head| {
-                super::config::APP_CONFIG
+                config
                     .cors_origins
-                    .split(",")
-                    .collect::<Vec<&str>>()
                     .iter()
                     .map(|d| origin.as_bytes().ends_with(d.as_bytes()))
                     .fold(false, |acc, x| x || acc)
@@ -82,12 +76,9 @@ pub mod cors {
 
 pub mod db {
     use sqlx::PgPool;
-    use std::env;
 
-    pub async fn get_connection_pool() -> PgPool {
-        let db_uri = env::var("DATABASE_URL").expect("DATABASE_URL is not set.");
-
-        PgPool::connect(&db_uri)
+    pub async fn get_connection_pool(config: super::config::Config) -> PgPool {
+        PgPool::connect(&config.db_url)
             .await
             .expect("Could not get database connection pool.")
     }
