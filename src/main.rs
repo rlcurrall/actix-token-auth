@@ -11,11 +11,11 @@ use utils::{config, db};
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
-    let config = config::Config::init();
-
     utils::log::init_logger().expect("Failed to initialize logger.");
 
+    let config = config::Config::init();
     let db_pool = db::get_connection_pool(config.clone()).await;
+    let address = format!("{}:{}", config.app_address, config.app_port);
 
     HttpServer::new(move || {
         App::new()
@@ -29,7 +29,7 @@ async fn main() -> std::io::Result<()> {
             .configure(handlers::cookie_handler::init)
             .configure(handlers::token_handler::init)
     })
-    .bind("127.0.0.1:8080")?
+    .bind(address)?
     .run()
     .await
 }

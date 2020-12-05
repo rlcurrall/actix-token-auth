@@ -21,6 +21,8 @@ pub mod config {
     pub struct Config {
         pub app_key: String,
         pub app_domain: String,
+        pub app_port: String,
+        pub app_address: String,
         pub app_secure: bool,
         pub app_debug: bool,
         pub cors_methods: Vec<String>,
@@ -33,6 +35,8 @@ pub mod config {
             Self {
                 app_key: env::var("APP_KEY").expect("APP_KEY not set."),
                 app_domain: env::var("APP_DOMAIN").expect("APP_DOMAIN not set."),
+                app_port: env::var("APP_PORT").unwrap_or("8080".into()),
+                app_address: env::var("APP_ADDRESS").unwrap_or("127.0.0.1".into()),
                 app_secure: env::var("APP_SECURE")
                     .expect("APP_SECURE not set.")
                     .parse::<bool>()
