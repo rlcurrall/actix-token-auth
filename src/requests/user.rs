@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::pin::Pin;
 
-pub use crate::models::CreateUser;
+pub use crate::models::user::CreateUser;
 
 #[derive(Serialize, Deserialize)]
 pub struct LoginRequest {

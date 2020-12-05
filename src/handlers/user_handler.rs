@@ -1,6 +1,6 @@
 use crate::{errors::ServiceError, models::User, requests::user::CreateUser};
 use actix_web::{
-    delete, get, put, post,
+    delete, get, post, put,
     web::{Data, Json, Path, ServiceConfig},
     HttpResponse, Responder,
 };

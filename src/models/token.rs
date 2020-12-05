@@ -1,9 +1,8 @@
-// use super::User;
 use crate::utils::hash;
 use chrono::{DateTime, Utc};
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use serde::{Deserialize, Serialize};
-use sqlx::{PgPool, Done};
+use sqlx::{Done, PgPool};
 
 pub struct CreateToken {
     pub user_id: i64,
