@@ -1,12 +1,12 @@
+use actix_web::{middleware, web, App, HttpServer};
+use dotenv::dotenv;
+use utils::{config, db};
+
 mod errors;
 mod handlers;
 mod models;
 mod requests;
 mod utils;
-
-use actix_web::{middleware, web, App, HttpServer};
-use dotenv::dotenv;
-use utils::{config, db};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
