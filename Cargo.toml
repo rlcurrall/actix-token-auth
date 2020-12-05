@@ -3,8 +3,7 @@ name = "rcs"
 version = "0.1.0"
 authors = ["Robb Currall <rlcurra@castlebranch.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+publish = false
 
 [dependencies]
 actix-cors = "0.5.3"
@@ -17,12 +16,10 @@ derive_more = "0.99.11"
 dotenv = "0.15.0"
 fern = "0.6.0"
 futures = "0.3.8"
-# futures_core = "0.1"
-# futures_util = "0.1"
 lazy_static = "1.4.0"
 log = "0.4.11"
 rand = "0.7.3"
 serde = "1.0.117"
-serde_json = "1.0.59"
+serde_json = "1.0.60"
 sqlx = { version = "0.4.1", features = ["runtime-async-std-native-tls", "postgres", "chrono"] }
 time = "0.2.23"
