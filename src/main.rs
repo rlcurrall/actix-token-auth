@@ -25,9 +25,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(utils::cors::init(config.clone()))
             .wrap(utils::auth::cookie_auth(config.clone()))
             .data(web::JsonConfig::default().limit(4096))
-            .configure(handlers::user_handler::init)
-            .configure(handlers::cookie_handler::init)
-            .configure(handlers::token_handler::init)
+            .configure(handlers::init)
     })
     .bind(address)?
     .run()

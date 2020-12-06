@@ -27,6 +27,7 @@ pub mod config {
         pub app_debug: bool,
         pub cors_methods: Vec<String>,
         pub cors_origins: Vec<String>,
+        pub cors_credentials: bool,
         pub db_url: String,
         pub token_ttl: Option<i64>,
         pub token_refresh: bool,
@@ -57,6 +58,10 @@ pub mod config {
                     .split(",")
                     .map(|x| x.into())
                     .collect(),
+                cors_credentials: env::var("CORS_CREDENTIALS")
+                    .unwrap_or("false".into())
+                    .parse::<bool>()
+                    .unwrap(),
                 db_url: env::var("DATABASE_URL").expect("DATABASE_URL is not set."),
                 token_ttl: env::var("TOKEN_TTL")
                     .map(|x| x.parse::<i64>().unwrap())
@@ -72,16 +77,40 @@ pub mod config {
 
 pub mod cors {
     pub fn init(config: super::config::Config) -> actix_cors::Cors {
-        let policy = actix_cors::Cors::default()
-            .supports_credentials()
-            .allowed_methods(config.cors_methods.iter().map(|x| x.as_str()))
-            .allowed_origin_fn(move |origin, _req_head| {
+        let mut policy = actix_cors::Cors::default();
+
+        policy = match config.cors_credentials {
+            true => policy.supports_credentials(),
+            false => policy,
+        };
+
+        policy = match config
+            .cors_methods
+            .iter()
+            .map(|x| x.as_str())
+            .collect::<Vec<&str>>()
+            .as_slice()
+        {
+            ["*"] => policy.allow_any_method(),
+            _ => policy.allowed_methods(config.cors_methods.iter().map(|x| x.as_str())),
+        };
+
+        policy = match config
+            .cors_origins
+            .iter()
+            .map(|x| x.as_str())
+            .collect::<Vec<&str>>()
+            .as_slice()
+        {
+            ["*"] => policy.allow_any_origin(),
+            _ => policy.allowed_origin_fn(move |origin, _req_head| {
                 config
                     .cors_origins
                     .iter()
                     .map(|d| origin.as_bytes().ends_with(d.as_bytes()))
                     .fold(false, |acc, x| x || acc)
-            });
+            }),
+        };
 
         policy
     }

@@ -4,6 +4,7 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 struct ErrorMessage {
+    code: u16,
     error: String,
     message: String,
 }
@@ -62,9 +63,13 @@ impl ResponseError for ServiceError {
     }
 
     fn error_response(&self) -> HttpResponse {
-        let status_code = self.status_code();
+        let code = self.status_code();
         let error = self.name();
         let message = self.to_string();
-        HttpResponse::build(status_code).json(ErrorMessage { error, message })
+        HttpResponse::build(code).json(ErrorMessage {
+            code: code.as_u16(),
+            error,
+            message,
+        })
     }
 }
