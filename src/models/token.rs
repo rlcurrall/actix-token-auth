@@ -1,8 +1,9 @@
-use crate::utils::hash;
-use chrono::{DateTime, Utc};
+use crate::utils::{config::Config, hash};
+use chrono::{DateTime, Duration, Utc};
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 use sqlx::{Done, PgPool};
+use std::ops::Add;
 
 pub struct CreateToken {
     pub user_id: i64,
@@ -18,13 +19,14 @@ pub struct PersonalAccessToken {
     #[serde(skip)]
     pub token: String,
     pub abilities: Option<Vec<String>>,
+    pub last_used_at: DateTime<Utc>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub deleted_at: Option<DateTime<Utc>>,
 }
 
 impl PersonalAccessToken {
-    pub async fn find(token: String, pool: &PgPool) -> sqlx::Result<Self> {
+    pub async fn find_by_token(token: String, pool: &PgPool) -> sqlx::Result<Self> {
         let invalid_token = sqlx::Error::Decode("invalid token".into());
         let data: Vec<&str> = token.split("|").collect();
         if data.len() != 2 {
@@ -48,18 +50,13 @@ impl PersonalAccessToken {
             name: res.name,
             token: res.token,
             abilities: res.abilities,
+            last_used_at: res.last_used_at,
             created_at: res.created_at,
             updated_at: res.updated_at,
             deleted_at: res.deleted_at,
         };
 
-        match pat.verify_token(token) {
-            true => {
-                pat.touch(&pool).await?;
-                Ok(pat)
-            }
-            false => Err(sqlx::Error::RowNotFound),
-        }
+        Ok(pat)
     }
 
     pub async fn create(data: CreateToken, pool: &PgPool) -> sqlx::Result<(String, Self)> {
@@ -89,6 +86,7 @@ impl PersonalAccessToken {
                 name: res.name,
                 token: res.token,
                 abilities: res.abilities,
+                last_used_at: res.last_used_at,
                 created_at: res.created_at,
                 updated_at: res.updated_at,
                 deleted_at: res.deleted_at,
@@ -108,7 +106,7 @@ impl PersonalAccessToken {
         Ok(res)
     }
 
-    async fn touch(&self, pool: &PgPool) -> sqlx::Result<u64> {
+    pub async fn touch(&self, pool: &PgPool) -> sqlx::Result<u64> {
         let res = sqlx::query!(
             r#"
             UPDATE personal_access_tokens
@@ -123,11 +121,20 @@ impl PersonalAccessToken {
         Ok(res)
     }
 
-    fn verify_token(&self, token: String) -> bool {
+    pub fn verify_token(&self, token: String, config: &Config) -> bool {
         let data: Vec<&str> = token.split("|").collect();
 
         if data.len() == 2 {
-            hash::check(self.token.clone(), data[1].into())
+            let expired: bool;
+            let valid_hash = hash::check(self.token.clone(), data[1].into());
+
+            expired = match (config.token_ttl, config.token_refresh) {
+                (Some(ttl), true) => Utc::now().ge(&self.last_used_at.add(Duration::minutes(ttl))),
+                (Some(ttl), false) => Utc::now().ge(&self.created_at.add(Duration::minutes(ttl))),
+                (None, _) => false,
+            };
+
+            valid_hash && !expired
         } else {
             false
         }

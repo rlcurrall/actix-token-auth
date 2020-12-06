@@ -1,4 +1,4 @@
-use crate::{errors::ServiceError, models::PersonalAccessToken};
+use crate::{errors::ServiceError, models::PersonalAccessToken, utils::config::Config};
 use actix_web::{dev::Payload, web::Data, Error, FromRequest, HttpRequest};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use serde::{Deserialize, Serialize};
@@ -19,6 +19,7 @@ impl FromRequest for PersonalAccessToken {
 
     fn from_request(req: &HttpRequest, pl: &mut Payload) -> Self::Future {
         let pool = req.app_data::<Data<PgPool>>().unwrap().clone();
+        let config = req.app_data::<Data<Config>>().unwrap().clone();
         let credentials = BearerAuth::from_request(req, pl).into_inner();
 
         Box::pin(async move {
@@ -27,11 +28,20 @@ impl FromRequest for PersonalAccessToken {
                 .token()
                 .to_owned();
 
-            let token = Self::find(bearer, &pool)
+            let token = Self::find_by_token(bearer.clone(), &pool)
                 .await
                 .map_err(|_| ServiceError::Unauthorized)?;
 
-            Ok(token)
+            match token.verify_token(bearer.clone(), &config) {
+                true => {
+                    token
+                        .touch(&pool)
+                        .await
+                        .map_err(|_| ServiceError::Unknown)?;
+                    Ok(token)
+                }
+                false => Err(ServiceError::Unauthorized.into()),
+            }
         })
     }
 }

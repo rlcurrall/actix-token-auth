@@ -4,7 +4,7 @@ CREATE TABLE personal_access_tokens (
     name            VARCHAR(255)    NOT NULL,
     token           VARCHAR(128)     NOT NULL,
     abilities       TEXT[]          NULL,
-    last_used_at    TIMESTAMPTZ(0)  NULL,
+    last_used_at    TIMESTAMPTZ(0)  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at      TIMESTAMPTZ(0)  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMPTZ(0)  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at      TIMESTAMPTZ(0)  NULL

@@ -28,17 +28,19 @@ pub mod config {
         pub cors_methods: Vec<String>,
         pub cors_origins: Vec<String>,
         pub db_url: String,
+        pub token_ttl: Option<i64>,
+        pub token_refresh: bool,
     }
 
     impl Config {
         pub fn init() -> Self {
             Self {
                 app_key: env::var("APP_KEY").expect("APP_KEY not set."),
-                app_domain: env::var("APP_DOMAIN").expect("APP_DOMAIN not set."),
+                app_domain: env::var("APP_DOMAIN").unwrap_or("localhost".into()),
                 app_port: env::var("APP_PORT").unwrap_or("8080".into()),
                 app_address: env::var("APP_ADDRESS").unwrap_or("127.0.0.1".into()),
                 app_secure: env::var("APP_SECURE")
-                    .expect("APP_SECURE not set.")
+                    .unwrap_or("false".into())
                     .parse::<bool>()
                     .unwrap(),
                 app_debug: env::var("APP_DEBUG")
@@ -56,6 +58,13 @@ pub mod config {
                     .map(|x| x.into())
                     .collect(),
                 db_url: env::var("DATABASE_URL").expect("DATABASE_URL is not set."),
+                token_ttl: env::var("TOKEN_TTL")
+                    .map(|x| x.parse::<i64>().unwrap())
+                    .ok(),
+                token_refresh: env::var("TOKEN_REFRESH")
+                    .unwrap_or("false".into())
+                    .parse::<bool>()
+                    .unwrap(),
             }
         }
     }
