@@ -24,7 +24,14 @@ pub struct PersonalAccessToken {
 }
 
 impl PersonalAccessToken {
-    pub async fn find(id: i64, pool: &PgPool) -> sqlx::Result<Self> {
+    pub async fn find(token: String, pool: &PgPool) -> sqlx::Result<Self> {
+        let invalid_token = sqlx::Error::Decode("invalid token".into());
+        let data: Vec<&str> = token.split("|").collect();
+        if data.len() != 2 {
+            return Err(invalid_token);
+        }
+        let id = data[0].parse::<i64>().ok();
+
         let res = sqlx::query!(
             r#"
                 SELECT * FROM personal_access_tokens
@@ -35,7 +42,7 @@ impl PersonalAccessToken {
         .fetch_one(&*pool)
         .await?;
 
-        Ok(Self {
+        let pat = Self {
             id: res.id,
             user_id: res.user_id,
             name: res.name,
@@ -44,7 +51,15 @@ impl PersonalAccessToken {
             created_at: res.created_at,
             updated_at: res.updated_at,
             deleted_at: res.deleted_at,
-        })
+        };
+
+        match pat.verify_token(token) {
+            true => {
+                pat.touch(&pool).await?;
+                Ok(pat)
+            }
+            false => Err(sqlx::Error::RowNotFound),
+        }
     }
 
     pub async fn create(data: CreateToken, pool: &PgPool) -> sqlx::Result<(String, Self)> {
@@ -81,31 +96,6 @@ impl PersonalAccessToken {
         ))
     }
 
-    pub async fn verify(token: String, pool: &PgPool) -> sqlx::Result<bool> {
-        let invalid_token = sqlx::Error::Decode("invalid token".into());
-        let data: Vec<&str> = token.split("|").collect();
-        if data.len() != 2 {
-            return Err(invalid_token);
-        }
-
-        match (data[0].parse::<i64>(), data[1], pool) {
-            (Ok(id), token, pool) => {
-                let res = sqlx::query!(
-                    r#"
-                        SELECT * FROM personal_access_tokens
-                        WHERE id = $1 AND deleted_at ISNULL
-                    "#,
-                    id
-                )
-                .fetch_one(&*pool)
-                .await?;
-
-                Ok(hash::check(res.token, token.into()))
-            }
-            (_, _, _) => Err(invalid_token),
-        }
-    }
-
     pub async fn delete(self, pool: &PgPool) -> sqlx::Result<u64> {
         let res = sqlx::query!(
             r#"DELETE FROM personal_access_tokens WHERE id = $1"#,
@@ -116,5 +106,30 @@ impl PersonalAccessToken {
         .rows_affected();
 
         Ok(res)
+    }
+
+    async fn touch(&self, pool: &PgPool) -> sqlx::Result<u64> {
+        let res = sqlx::query!(
+            r#"
+            UPDATE personal_access_tokens
+            SET last_used_at = now()
+            WHERE id = $1"#,
+            self.id
+        )
+        .execute(&*pool)
+        .await?
+        .rows_affected();
+
+        Ok(res)
+    }
+
+    fn verify_token(&self, token: String) -> bool {
+        let data: Vec<&str> = token.split("|").collect();
+
+        if data.len() == 2 {
+            hash::check(self.token.clone(), data[1].into())
+        } else {
+            false
+        }
     }
 }
