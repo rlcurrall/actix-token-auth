@@ -21,8 +21,6 @@ pub struct PersonalAccessToken {
     pub abilities: Option<Vec<String>>,
     pub last_used_at: DateTime<Utc>,
     pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-    pub deleted_at: Option<DateTime<Utc>>,
 }
 
 impl PersonalAccessToken {
@@ -37,7 +35,7 @@ impl PersonalAccessToken {
         let res = sqlx::query!(
             r#"
                 SELECT * FROM personal_access_tokens
-                WHERE id = $1 AND deleted_at ISNULL
+                WHERE id = $1
             "#,
             id
         )
@@ -52,8 +50,6 @@ impl PersonalAccessToken {
             abilities: res.abilities,
             last_used_at: res.last_used_at,
             created_at: res.created_at,
-            updated_at: res.updated_at,
-            deleted_at: res.deleted_at,
         };
 
         Ok(pat)
@@ -88,8 +84,6 @@ impl PersonalAccessToken {
                 abilities: res.abilities,
                 last_used_at: res.last_used_at,
                 created_at: res.created_at,
-                updated_at: res.updated_at,
-                deleted_at: res.deleted_at,
             },
         ))
     }
