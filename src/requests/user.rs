@@ -1,4 +1,7 @@
-use crate::{errors::ServiceError, models::User};
+use crate::{
+    errors::ServiceError,
+    models::{PersonalAccessToken, User},
+};
 use actix_identity::Identity;
 use actix_web::{dev::Payload, web::Data, Error, FromRequest, HttpRequest};
 use futures::prelude::*;
@@ -25,31 +28,24 @@ impl FromRequest for User {
     type Future = Pin<Box<dyn Future<Output = Result<User, Error>>>>;
 
     fn from_request(req: &HttpRequest, pl: &mut Payload) -> Self::Future {
+        let pat_future = PersonalAccessToken::from_request(req, pl);
         let cookie_id = Identity::from_request(req, pl).into_inner();
         let pool = req.app_data::<Data<PgPool>>().unwrap().clone();
 
         Box::pin(async move {
-            let identity = match cookie_id {
-                Ok(identity) => identity,
-                Err(_) => return Err(ServiceError::Unauthorized.into()),
+            let user_id = match pat_future.await {
+                Ok(pat) => pat.user_id,
+                Err(_) => cookie_id
+                    .map_err(|_| ServiceError::Unknown)?
+                    .identity()
+                    .ok_or(ServiceError::Unauthorized)?
+                    .parse::<i64>()
+                    .map_err(|_| ServiceError::BadRequest("Invalid cookie.".into()))?,
             };
 
-            let id = match identity.identity() {
-                Some(id_str) => id_str.parse::<i64>().unwrap(),
-                None => {
-                    identity.forget();
-                    return Err(ServiceError::Unauthorized.into());
-                }
-            };
+            let user = Self::find(&pool, user_id).await?;
 
-            match Self::find(&pool, id).await {
-                Ok(user) => Ok(user),
-                Err(msg) => {
-                    identity.forget();
-                    log::error!("{}", msg);
-                    Err(ServiceError::InternalServerError("".into()).into())
-                }
-            }
+            Ok(user)
         })
     }
 }

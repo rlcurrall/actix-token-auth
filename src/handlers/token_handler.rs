@@ -68,8 +68,8 @@ pub async fn logout(
 }
 
 #[get("/me")]
-pub async fn me(bearer: PersonalAccessToken, pool: Data<PgPool>) -> Result<HttpResponse> {
-    let user = User::find(&pool, bearer.user_id).await?;
+pub async fn me(user: User, _pool: Data<PgPool>) -> Result<HttpResponse> {
+    // let user = User::find(&pool, bearer.user_id).await?;
 
     Ok(HttpResponse::Ok().json(user))
 }

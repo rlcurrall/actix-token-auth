@@ -35,10 +35,7 @@ impl FromRequest for PersonalAccessToken {
             match token.verify_token(token_str.clone(), &config)? {
                 false => Err(ServiceError::Unauthorized.into()),
                 true => {
-                    token
-                        .touch(&pool)
-                        .await
-                        .map_err(|_| ServiceError::Unknown)?;
+                    token.touch(&pool).await?;
                     Ok(token)
                 }
             }
