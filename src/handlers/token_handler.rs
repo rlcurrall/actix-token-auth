@@ -1,17 +1,16 @@
 use crate::{
-    errors::ServiceError,
+    errors::{Result, ServiceError},
     models::{PersonalAccessToken, User},
     requests::token::TokenLogin,
     utils::{config::Config, hash},
 };
 use actix_web::{
     cookie::Cookie,
-    error::Error,
     get, post,
     web::{self, Data, Json, ServiceConfig},
     HttpMessage, HttpRequest, HttpResponse, Responder,
 };
-use sqlx::postgres::PgPool;
+use sqlx::PgPool;
 
 #[get("/cookie")]
 pub async fn set_cookie(config: Data<Config>) -> impl Responder {
@@ -27,17 +26,7 @@ pub async fn set_cookie(config: Data<Config>) -> impl Responder {
 
 #[post("/login")]
 pub async fn login(req: HttpRequest, data: Json<TokenLogin>, pool: Data<PgPool>) -> impl Responder {
-    let user = User::find_by_email(&pool, data.email.clone())
-        .await
-        .map_err(|e| match e {
-            sqlx::Error::RowNotFound => {
-                ServiceError::BadRequest("These credentials do not match our records.".into())
-            }
-            _ => {
-                log::error!("An error occurred while logging in:\n{}", e);
-                ServiceError::Unknown
-            }
-        })?;
+    let user = User::find_by_email(&pool, data.email.clone()).await?;
 
     if !hash::check(user.password.clone(), data.password.clone()) {
         return Err(ServiceError::BadRequest(
@@ -65,7 +54,7 @@ pub async fn logout(
     req: HttpRequest,
     bearer: PersonalAccessToken,
     pool: Data<PgPool>,
-) -> Result<HttpResponse, Error> {
+) -> Result<HttpResponse> {
     bearer.delete(&pool).await?;
 
     let mut res = HttpResponse::NoContent();
@@ -78,13 +67,8 @@ pub async fn logout(
 }
 
 #[get("/me")]
-pub async fn me(bearer: PersonalAccessToken, pool: Data<PgPool>) -> Result<HttpResponse, Error> {
-    let user = User::find(&pool, bearer.user_id)
-        .await
-        .map_err(|e| match e {
-            sqlx::Error::RowNotFound => ServiceError::NotFound("User not found".into()),
-            _ => ServiceError::Unknown,
-        })?;
+pub async fn me(bearer: PersonalAccessToken, pool: Data<PgPool>) -> Result<HttpResponse> {
+    let user = User::find(&pool, bearer.user_id).await?;
 
     Ok(HttpResponse::Ok().json(user))
 }

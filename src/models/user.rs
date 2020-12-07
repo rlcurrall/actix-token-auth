@@ -1,4 +1,7 @@
-use crate::utils::hash;
+use crate::{
+    errors::{Result, ServiceError},
+    utils::hash,
+};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{Done, FromRow, PgPool};
@@ -16,7 +19,7 @@ pub struct User {
 }
 
 impl User {
-    pub async fn find(pool: &PgPool, id: i64) -> sqlx::Result<User> {
+    pub async fn find(pool: &PgPool, id: i64) -> Result<User> {
         let res = sqlx::query!(
             r#"
                 SELECT *
@@ -26,7 +29,14 @@ impl User {
             id
         )
         .fetch_one(&*pool)
-        .await?;
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::RowNotFound => ServiceError::NotFound("User not found.".into()),
+            _ => {
+                log::error!("Could not fetch user:\n{}", e);
+                ServiceError::Unknown
+            }
+        })?;
 
         Ok(User {
             id: res.id,
@@ -39,7 +49,7 @@ impl User {
         })
     }
 
-    pub async fn find_by_email(pool: &PgPool, email: String) -> sqlx::Result<User> {
+    pub async fn find_by_email(pool: &PgPool, email: String) -> Result<User> {
         let res = sqlx::query!(
             r#"
                 SELECT *
@@ -49,7 +59,14 @@ impl User {
             email
         )
         .fetch_one(&*pool)
-        .await?;
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::RowNotFound => ServiceError::NotFound("User not found.".into()),
+            _ => {
+                log::error!("Could not fetch user:\n{}", e);
+                ServiceError::Unknown
+            }
+        })?;
 
         Ok(User {
             id: res.id,
@@ -62,20 +79,29 @@ impl User {
         })
     }
 
-    pub async fn create(pool: &PgPool, data: CreateUser) -> sqlx::Result<Self> {
-        let password = hash::make(data.password);
+    pub async fn create(
+        pool: &PgPool,
+        email: String,
+        password: String,
+        full_name: String,
+    ) -> Result<Self> {
+        let password = hash::make(password);
         let res = sqlx::query!(
             r#"
                 INSERT INTO users (email, password, full_name)
                 VALUES ($1, $2, $3)
                 RETURNING *
             "#,
-            data.email,
+            email,
             password,
-            data.full_name
+            full_name
         )
         .fetch_one(&*pool)
-        .await?;
+        .await
+        .map_err(|e| {
+            log::error!("Could not create user:\n{}", e);
+            ServiceError::Unknown
+        })?;
 
         Ok(Self {
             id: res.id,
@@ -88,19 +114,20 @@ impl User {
         })
     }
 
-    pub async fn delete(pool: &PgPool, id: i64) -> sqlx::Result<u64> {
+    pub async fn delete(pool: &PgPool, id: i64) -> Result<u64> {
         let deleted = sqlx::query!("DELETE FROM users WHERE id = $1", id)
             .execute(&*pool)
-            .await?
-            .rows_affected();
+            .await
+            .map_err(|e| {
+                log::error!("Could not delete user:\n{}", e);
+                ServiceError::Unknown
+            })?;
 
-        Ok(deleted)
+        match deleted.rows_affected() {
+            0 => Err(ServiceError::BadRequest(
+                "User does not exist, or has been deleted already.".into(),
+            )),
+            count => Ok(count),
+        }
     }
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CreateUser {
-    pub email: String,
-    pub password: String,
-    pub full_name: String,
 }

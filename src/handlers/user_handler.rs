@@ -7,8 +7,14 @@ use actix_web::{
 use sqlx::PgPool;
 
 #[post("/register")]
-pub async fn register(req_body: Json<CreateUser>, pool: Data<PgPool>) -> impl Responder {
-    let res = User::create(&pool, req_body.into_inner()).await;
+pub async fn register(data: Json<CreateUser>, pool: Data<PgPool>) -> impl Responder {
+    let res = User::create(
+        &pool,
+        data.email.clone(),
+        data.password.clone(),
+        data.full_name.clone(),
+    )
+    .await;
 
     match res {
         Ok(user) => Ok(HttpResponse::Ok().json(user)),
