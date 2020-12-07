@@ -34,19 +34,19 @@ pub async fn login(req: HttpRequest, data: Json<TokenLogin>, pool: Data<PgPool>)
         ));
     }
 
-    let new_token = PersonalAccessToken::create(&pool, user.id, data.device.clone(), None).await?;
+    let transient_token = PersonalAccessToken::create(&pool, user.id, data.device.clone(), None).await?;
 
     let mut response = HttpResponse::Ok();
 
     if req.cookie("token").is_some() {
         response.cookie(
-            Cookie::build("token", new_token.token.clone())
+            Cookie::build("token", transient_token.to_string())
                 .http_only(true)
                 .finish(),
         );
     }
 
-    Ok(response.json(new_token))
+    Ok(response.json(transient_token))
 }
 
 #[get("/logout")]

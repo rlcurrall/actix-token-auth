@@ -4,11 +4,11 @@ use crate::{
 };
 use chrono::{DateTime, Duration, Utc};
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
-use serde::{Deserialize, Serialize};
+use serde::{Serialize, Serializer, ser::SerializeStruct};
 use sqlx::{Done, PgPool};
 use std::ops::Add;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct PersonalAccessToken {
     pub id: i64,
     pub user_id: i64,
@@ -59,7 +59,7 @@ impl PersonalAccessToken {
         user_id: i64,
         name: String,
         abilities: Option<Vec<String>>,
-    ) -> Result<NewToken> {
+    ) -> Result<TransientToken> {
         let value: String = thread_rng().sample_iter(&Alphanumeric).take(64).collect();
         let hashed = hash::make(value.clone());
         let abilities = abilities.unwrap_or(vec!["*".into()]);
@@ -84,10 +84,9 @@ impl PersonalAccessToken {
         .map(|t| TransientToken {
             id: t.id,
             hash: value,
-        })?
-        .to_string();
+        })?;
 
-        Ok(NewToken::bearer(token))
+        Ok(token)
     }
 
     pub async fn delete(self, pool: &PgPool) -> Result<u64> {
@@ -143,31 +142,18 @@ impl PersonalAccessToken {
     }
 }
 
-/// NewToken...
-///
-#[derive(Serialize)]
-pub struct NewToken {
-    pub token_type: String,
-    pub token: String,
-}
-
-impl NewToken {
-    fn bearer(token: String) -> Self {
-        Self {
-            token_type: "bearer".into(),
-            token,
-        }
-    }
-}
-
 /// Transient Token
 ///
-struct TransientToken {
+pub struct TransientToken {
     id: i64,
     hash: String,
 }
 
 impl TransientToken {
+    pub fn get_type(&self) -> String {
+        "bearer".into()
+    }
+
     fn parse(token: String) -> Result<Self> {
         let parse_error =
             ServiceError::InternalServerError("Could not parse authentication token.".into());
@@ -187,5 +173,14 @@ impl TransientToken {
 impl std::fmt::Display for TransientToken {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}|{}", self.id, self.hash)
+    }
+}
+
+impl Serialize for TransientToken {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> where S: Serializer {
+        let mut state = serializer.serialize_struct("Color", 2)?;
+        state.serialize_field("type", &self.get_type())?;
+        state.serialize_field("token", &self.to_string())?;
+        state.end()
     }
 }

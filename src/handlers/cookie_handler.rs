@@ -13,22 +13,15 @@ pub async fn login(
     id: Identity,
     pool: Data<PgPool>,
 ) -> impl Responder {
-    let res = User::find_by_email(&pool, request.email.clone()).await;
+    let user = User::find_by_email(&pool, request.email.clone()).await?;
 
-    match res {
-        Ok(user) => {
-            if hash::check(user.password.clone(), request.password.clone()) {
-                id.remember(user.id.to_string());
-                return Ok(HttpResponse::Ok().finish());
-            }
-
-            Err(ServiceError::BadRequest(
-                "These credentials do not match our records.".into(),
-            ))
-        }
-        Err(_) => Err(ServiceError::BadRequest(
+    if hash::check(user.password.clone(), request.password.clone()) {
+        id.remember(user.id.to_string());
+        return Ok(HttpResponse::Ok().finish());
+    } else {
+        Err(ServiceError::BadRequest(
             "These credentials do not match our records.".into(),
-        )),
+        ))
     }
 }
 
