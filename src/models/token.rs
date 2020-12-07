@@ -1,15 +1,12 @@
-use crate::utils::{config::Config, hash};
+use crate::{
+    errors::{Result, ServiceError},
+    utils::{config::Config, hash},
+};
 use chrono::{DateTime, Duration, Utc};
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use serde::{Deserialize, Serialize};
 use sqlx::{Done, PgPool};
 use std::ops::Add;
-
-pub struct CreateToken {
-    pub user_id: i64,
-    pub name: String,
-    pub abilities: Option<Vec<String>>,
-}
 
 #[derive(Serialize, Deserialize)]
 pub struct PersonalAccessToken {
@@ -24,23 +21,25 @@ pub struct PersonalAccessToken {
 }
 
 impl PersonalAccessToken {
-    pub async fn find_by_token(token: String, pool: &PgPool) -> sqlx::Result<Self> {
-        let invalid_token = sqlx::Error::Decode("invalid token".into());
-        let data: Vec<&str> = token.split("|").collect();
-        if data.len() != 2 {
-            return Err(invalid_token);
-        }
-        let id = data[0].parse::<i64>().ok();
+    pub async fn find_by_token(pool: &PgPool, token: String) -> Result<Self> {
+        let transient_token = TransientToken::parse(token)?;
 
         let res = sqlx::query!(
             r#"
                 SELECT * FROM personal_access_tokens
                 WHERE id = $1
             "#,
-            id
+            transient_token.id
         )
         .fetch_one(&*pool)
-        .await?;
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::RowNotFound => ServiceError::Unauthorized,
+            e => {
+                log::error!("Error occurred getting token:\n{}", e);
+                ServiceError::Unknown
+            }
+        })?;
 
         let pat = Self {
             id: res.id,
@@ -55,52 +54,61 @@ impl PersonalAccessToken {
         Ok(pat)
     }
 
-    pub async fn create(data: CreateToken, pool: &PgPool) -> sqlx::Result<(String, Self)> {
-        let token: String = thread_rng().sample_iter(&Alphanumeric).take(64).collect();
-        let hashed = hash::make(token.clone());
-        let abilities = data.abilities.unwrap_or(vec!["*".into()]);
+    pub async fn create(
+        pool: &PgPool,
+        user_id: i64,
+        name: String,
+        abilities: Option<Vec<String>>,
+    ) -> Result<NewToken> {
+        let value: String = thread_rng().sample_iter(&Alphanumeric).take(64).collect();
+        let hashed = hash::make(value.clone());
+        let abilities = abilities.unwrap_or(vec!["*".into()]);
 
-        let res = sqlx::query!(
+        let token = sqlx::query!(
             r#"
                 INSERT INTO personal_access_tokens (user_id, name, token, abilities)
                 VALUES ($1, $2, $3, $4)
                 RETURNING *
             "#,
-            data.user_id,
-            data.name,
+            user_id,
+            name,
             hashed,
             &abilities
         )
         .fetch_one(&*pool)
-        .await?;
+        .await
+        .map_err(|e| {
+            log::error!("Could not create token:\n{}", e);
+            ServiceError::Unknown
+        })
+        .map(|t| TransientToken {
+            id: t.id,
+            hash: value,
+        })?
+        .to_string();
 
-        Ok((
-            format!("{}|{}", res.id, token),
-            Self {
-                id: res.id,
-                user_id: res.user_id,
-                name: res.name,
-                token: res.token,
-                abilities: res.abilities,
-                last_used_at: res.last_used_at,
-                created_at: res.created_at,
-            },
-        ))
+        Ok(NewToken::bearer(token))
     }
 
-    pub async fn delete(self, pool: &PgPool) -> sqlx::Result<u64> {
+    pub async fn delete(self, pool: &PgPool) -> Result<u64> {
         let res = sqlx::query!(
             r#"DELETE FROM personal_access_tokens WHERE id = $1"#,
             self.id
         )
         .execute(&*pool)
-        .await?
-        .rows_affected();
+        .await
+        .map_err(|e| {
+            log::error!("Could not delete token:\n{}", e);
+            ServiceError::Unknown
+        })?;
 
-        Ok(res)
+        match res.rows_affected() {
+            0 => Err(ServiceError::BadRequest("Token does not exist, or already deleted".into()).into()),
+            count => Ok(count),
+        }
     }
 
-    pub async fn touch(&self, pool: &PgPool) -> sqlx::Result<u64> {
+    pub async fn touch(&self, pool: &PgPool) -> Result<u64> {
         let res = sqlx::query!(
             r#"
             UPDATE personal_access_tokens
@@ -109,28 +117,75 @@ impl PersonalAccessToken {
             self.id
         )
         .execute(&*pool)
-        .await?
+        .await
+        .map_err(|e| {
+            log::error!("Could not update token:\n{}", e);
+            ServiceError::Unknown
+        })?
         .rows_affected();
 
         Ok(res)
     }
 
-    pub fn verify_token(&self, token: String, config: &Config) -> bool {
-        let data: Vec<&str> = token.split("|").collect();
+    pub fn verify_token(&self, token: String, config: &Config) -> Result<bool> {
+        let transient_token = TransientToken::parse(token)?;
 
-        if data.len() == 2 {
-            let expired: bool;
-            let valid_hash = hash::check(self.token.clone(), data[1].into());
+        let expired: bool;
+        let valid_hash = hash::check(self.token.clone(), transient_token.hash);
 
-            expired = match (config.token_ttl, config.token_refresh) {
-                (Some(ttl), true) => Utc::now().ge(&self.last_used_at.add(Duration::minutes(ttl))),
-                (Some(ttl), false) => Utc::now().ge(&self.created_at.add(Duration::minutes(ttl))),
-                (None, _) => false,
-            };
+        expired = match (config.token_ttl, config.token_refresh) {
+            (Some(ttl), true) => Utc::now().ge(&self.last_used_at.add(Duration::minutes(ttl))),
+            (Some(ttl), false) => Utc::now().ge(&self.created_at.add(Duration::minutes(ttl))),
+            (None, _) => false,
+        };
 
-            valid_hash && !expired
-        } else {
-            false
+        Ok(valid_hash && !expired)
+    }
+}
+
+/// NewToken...
+///
+#[derive(Serialize)]
+pub struct NewToken {
+    pub token_type: String,
+    pub token: String,
+}
+
+impl NewToken {
+    fn bearer(token: String) -> Self {
+        Self {
+            token_type: "bearer".into(),
+            token,
         }
+    }
+}
+
+/// Transient Token
+///
+struct TransientToken {
+    id: i64,
+    hash: String,
+}
+
+impl TransientToken {
+    fn parse(token: String) -> Result<Self> {
+        let parse_error =
+            ServiceError::InternalServerError("Could not parse authentication token.".into());
+
+        match token.split("|").collect::<Vec<&str>>().as_slice() {
+            [id_str, hash_str] => {
+                let id = id_str.parse::<i64>().map_err(|_| parse_error)?;
+                let hash = hash_str.to_string();
+
+                Ok(TransientToken { id, hash })
+            }
+            _ => Err(parse_error.into()),
+        }
+    }
+}
+
+impl std::fmt::Display for TransientToken {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}|{}", self.id, self.hash)
     }
 }

@@ -7,7 +7,6 @@ pub mod auth {
             CookieIdentityPolicy::new(config.app_key.clone().as_bytes())
                 .name("auth")
                 .path("/")
-                .domain(config.app_domain.clone())
                 .max_age_time(Duration::days(1))
                 .secure(config.app_secure.clone()),
         )

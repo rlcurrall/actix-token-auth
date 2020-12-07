@@ -1,69 +1,98 @@
 use crate::{
     errors::ServiceError,
-    models::{token::CreateToken, PersonalAccessToken, User},
+    models::{PersonalAccessToken, User},
     requests::token::TokenLogin,
-    utils::hash,
+    utils::{config::Config, hash},
 };
 use actix_web::{
+    cookie::Cookie,
+    error::Error,
     get, post,
     web::{self, Data, Json, ServiceConfig},
-    HttpResponse, Responder,
+    HttpMessage, HttpRequest, HttpResponse, Responder,
 };
-use serde_json::json;
 use sqlx::postgres::PgPool;
 
-#[post("/login")]
-pub async fn login(req: Json<TokenLogin>, pool: Data<PgPool>) -> impl Responder {
-    let res = User::find_by_email(req.email.clone(), &pool).await;
+#[get("/cookie")]
+pub async fn set_cookie(config: Data<Config>) -> impl Responder {
+    HttpResponse::Ok()
+        .cookie(
+            Cookie::build("token", "")
+                .http_only(true)
+                .secure(config.app_secure)
+                .finish(),
+        )
+        .finish()
+}
 
-    if let Ok(user) = res {
-        if hash::check(user.password.clone(), req.password.clone()) {
-            let token_data = CreateToken {
-                user_id: user.id,
-                name: req.device.clone(),
-                abilities: None,
-            };
-            match PersonalAccessToken::create(token_data, &pool).await {
-                Ok((token, _)) => return Ok(HttpResponse::Ok().json(json!({ "token": token }))),
-                Err(e) => {
-                    log::error!("{}", e);
-                    return Err(ServiceError::InternalServerError(
-                        "Oops, something went wrong!".into(),
-                    ));
-                }
+#[post("/login")]
+pub async fn login(req: HttpRequest, data: Json<TokenLogin>, pool: Data<PgPool>) -> impl Responder {
+    let user = User::find_by_email(data.email.clone(), &pool)
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::RowNotFound => {
+                ServiceError::BadRequest("These credentials do not match our records.".into())
             }
-        }
+            _ => {
+                log::error!("An error occurred while logging in:\n{}", e);
+                ServiceError::Unknown
+            }
+        })?;
+
+    if !hash::check(user.password.clone(), data.password.clone()) {
+        return Err(ServiceError::BadRequest(
+            "These credentials do not match our records.".into(),
+        ));
     }
 
-    Err(ServiceError::BadRequest(
-        "These credentials do not match our records.".into(),
-    ))
+    let new_token = PersonalAccessToken::create(&pool, user.id, data.device.clone(), None).await?;
+
+    let mut response = HttpResponse::Ok();
+
+    if req.cookie("token").is_some() {
+        response.cookie(
+            Cookie::build("token", new_token.token.clone())
+                .http_only(true)
+                .finish(),
+        );
+    }
+
+    Ok(response.json(new_token))
 }
 
 #[get("/logout")]
-pub async fn logout(bearer: PersonalAccessToken, pool: Data<PgPool>) -> impl Responder {
-    match bearer.delete(&pool).await {
-        Ok(_) => Ok(HttpResponse::NoContent().finish()),
-        Err(e) => {
-            log::info!("{}", e);
-            Err(ServiceError::InternalServerError(
-                "Could not delete token.".into(),
-            ))
-        }
+pub async fn logout(
+    req: HttpRequest,
+    bearer: PersonalAccessToken,
+    pool: Data<PgPool>,
+) -> Result<HttpResponse, Error> {
+    bearer.delete(&pool).await?;
+
+    let mut res = HttpResponse::NoContent();
+
+    if let Some(ref cookie) = req.cookie("token") {
+        res.del_cookie(cookie);
     }
+
+    Ok(res.finish())
 }
 
 #[get("/me")]
-pub async fn me(bearer: PersonalAccessToken, pool: Data<PgPool>) -> impl Responder {
-    match User::find(bearer.user_id, &pool).await {
-        Ok(user) => Ok(HttpResponse::Ok().json(user)),
-        Err(_) => Err(ServiceError::NotFound("User not found.".into())),
-    }
+pub async fn me(bearer: PersonalAccessToken, pool: Data<PgPool>) -> Result<HttpResponse, Error> {
+    let user = User::find(bearer.user_id, &pool)
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::RowNotFound => ServiceError::NotFound("User not found".into()),
+            _ => ServiceError::Unknown,
+        })?;
+
+    Ok(HttpResponse::Ok().json(user))
 }
 
 pub fn init(cfg: &mut ServiceConfig) {
     cfg.service(
         web::scope("/token")
+            .service(set_cookie)
             .service(login)
             .service(logout)
             .service(me),

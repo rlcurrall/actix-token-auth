@@ -2,6 +2,8 @@ use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
 use derive_more::Display;
 use serde::Serialize;
 
+pub type Result<T> = std::result::Result<T, ServiceError>;
+
 #[derive(Serialize)]
 struct ErrorMessage {
     code: u16,
@@ -15,7 +17,7 @@ pub enum ServiceError {
     #[display(fmt = "{}", _0)]
     BadRequest(String),
 
-    #[display(fmt = "You are unauthorized.")]
+    #[display(fmt = "You are not logged in.")]
     Unauthorized,
 
     #[display(fmt = "You do not have access to the requested resource.")]
@@ -57,19 +59,18 @@ impl ResponseError for ServiceError {
             Self::Forbidden => StatusCode::FORBIDDEN,
             Self::NotFound(_) => StatusCode::NOT_FOUND,
             Self::UnprocessableEntity(_) => StatusCode::UNPROCESSABLE_ENTITY,
-            Self::InternalServerError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Self::Unknown => StatusCode::INTERNAL_SERVER_ERROR,
+            Self::InternalServerError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 
     fn error_response(&self) -> HttpResponse {
         let code = self.status_code();
-        let error = self.name();
-        let message = self.to_string();
+
         HttpResponse::build(code).json(ErrorMessage {
             code: code.as_u16(),
-            error,
-            message,
+            error: self.name(),
+            message: self.to_string(),
         })
     }
 }
