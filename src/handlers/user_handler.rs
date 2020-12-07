@@ -7,8 +7,8 @@ use actix_web::{
 use sqlx::PgPool;
 
 #[post("/register")]
-pub async fn register(req_body: Json<CreateUser>, db_pool: Data<PgPool>) -> impl Responder {
-    let res = User::create(req_body.into_inner(), &db_pool).await;
+pub async fn register(req_body: Json<CreateUser>, pool: Data<PgPool>) -> impl Responder {
+    let res = User::create(&pool, req_body.into_inner()).await;
 
     match res {
         Ok(user) => Ok(HttpResponse::Ok().json(user)),
@@ -20,8 +20,8 @@ pub async fn register(req_body: Json<CreateUser>, db_pool: Data<PgPool>) -> impl
 }
 
 #[get("/user/{id}")]
-pub async fn find(id: Path<i64>, db_pool: Data<PgPool>) -> impl Responder {
-    let res = User::find(id.into_inner(), &db_pool).await;
+pub async fn find(id: Path<i64>, pool: Data<PgPool>) -> impl Responder {
+    let res = User::find(&pool, id.into_inner()).await;
 
     match res {
         Ok(user) => Ok(HttpResponse::Ok().json(user)),
@@ -35,8 +35,8 @@ pub async fn update(_id: Path<i64>, req_body: Json<CreateUser>) -> impl Responde
 }
 
 #[delete("/user/{id}")]
-pub async fn delete(id: Path<i64>, db_pool: Data<PgPool>) -> impl Responder {
-    let res = User::delete(id.into_inner(), &db_pool).await;
+pub async fn delete(id: Path<i64>, pool: Data<PgPool>) -> impl Responder {
+    let res = User::delete(&pool, id.into_inner()).await;
 
     match res {
         Ok(1) => Ok(HttpResponse::NoContent().finish()),

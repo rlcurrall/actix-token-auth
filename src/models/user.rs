@@ -3,13 +3,6 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{Done, FromRow, PgPool};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CreateUser {
-    pub email: String,
-    pub password: String,
-    pub full_name: String,
-}
-
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct User {
     pub id: i64,
@@ -23,7 +16,7 @@ pub struct User {
 }
 
 impl User {
-    pub async fn find(id: i64, pool: &PgPool) -> sqlx::Result<User> {
+    pub async fn find(pool: &PgPool, id: i64) -> sqlx::Result<User> {
         let res = sqlx::query!(
             r#"
                 SELECT *
@@ -46,7 +39,7 @@ impl User {
         })
     }
 
-    pub async fn find_by_email(email: String, pool: &PgPool) -> sqlx::Result<User> {
+    pub async fn find_by_email(pool: &PgPool, email: String) -> sqlx::Result<User> {
         let res = sqlx::query!(
             r#"
                 SELECT *
@@ -69,7 +62,7 @@ impl User {
         })
     }
 
-    pub async fn create(data: CreateUser, pool: &PgPool) -> sqlx::Result<Self> {
+    pub async fn create(pool: &PgPool, data: CreateUser) -> sqlx::Result<Self> {
         let password = hash::make(data.password);
         let res = sqlx::query!(
             r#"
@@ -95,7 +88,7 @@ impl User {
         })
     }
 
-    pub async fn delete(id: i64, pool: &PgPool) -> sqlx::Result<u64> {
+    pub async fn delete(pool: &PgPool, id: i64) -> sqlx::Result<u64> {
         let deleted = sqlx::query!("DELETE FROM users WHERE id = $1", id)
             .execute(&*pool)
             .await?
@@ -103,4 +96,11 @@ impl User {
 
         Ok(deleted)
     }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CreateUser {
+    pub email: String,
+    pub password: String,
+    pub full_name: String,
 }

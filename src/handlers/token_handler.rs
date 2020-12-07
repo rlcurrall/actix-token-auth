@@ -27,7 +27,7 @@ pub async fn set_cookie(config: Data<Config>) -> impl Responder {
 
 #[post("/login")]
 pub async fn login(req: HttpRequest, data: Json<TokenLogin>, pool: Data<PgPool>) -> impl Responder {
-    let user = User::find_by_email(data.email.clone(), &pool)
+    let user = User::find_by_email(&pool, data.email.clone())
         .await
         .map_err(|e| match e {
             sqlx::Error::RowNotFound => {
@@ -79,7 +79,7 @@ pub async fn logout(
 
 #[get("/me")]
 pub async fn me(bearer: PersonalAccessToken, pool: Data<PgPool>) -> Result<HttpResponse, Error> {
-    let user = User::find(bearer.user_id, &pool)
+    let user = User::find(&pool, bearer.user_id)
         .await
         .map_err(|e| match e {
             sqlx::Error::RowNotFound => ServiceError::NotFound("User not found".into()),

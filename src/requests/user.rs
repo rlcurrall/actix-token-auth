@@ -37,7 +37,7 @@ impl FromRequest for User {
                 }
             };
 
-            match Self::find(id, &pool).await {
+            match Self::find(&pool, id).await {
                 Ok(user) => Ok(user),
                 Err(msg) => {
                     identity.forget();

@@ -11,9 +11,9 @@ use sqlx::postgres::PgPool;
 pub async fn login(
     request: Json<LoginRequest>,
     id: Identity,
-    db_pool: Data<PgPool>,
+    pool: Data<PgPool>,
 ) -> impl Responder {
-    let res = User::find_by_email(request.email.clone(), &db_pool).await;
+    let res = User::find_by_email(&pool, request.email.clone()).await;
 
     match res {
         Ok(user) => {
