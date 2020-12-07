@@ -4,7 +4,7 @@ use crate::{
 };
 use chrono::{DateTime, Duration, Utc};
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
-use serde::{Serialize, Serializer, ser::SerializeStruct};
+use serde::{ser::SerializeStruct, Serialize, Serializer};
 use sqlx::{Done, PgPool};
 use std::ops::Add;
 
@@ -102,7 +102,9 @@ impl PersonalAccessToken {
         })?;
 
         match res.rows_affected() {
-            0 => Err(ServiceError::BadRequest("Token does not exist, or already deleted".into()).into()),
+            0 => Err(
+                ServiceError::BadRequest("Token does not exist, or already deleted".into()).into(),
+            ),
             count => Ok(count),
         }
     }
@@ -177,7 +179,10 @@ impl std::fmt::Display for TransientToken {
 }
 
 impl Serialize for TransientToken {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> where S: Serializer {
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         let mut state = serializer.serialize_struct("Color", 2)?;
         state.serialize_field("type", &self.get_type())?;
         state.serialize_field("token", &self.to_string())?;

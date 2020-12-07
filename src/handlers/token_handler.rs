@@ -34,7 +34,8 @@ pub async fn login(req: HttpRequest, data: Json<TokenLogin>, pool: Data<PgPool>)
         ));
     }
 
-    let transient_token = PersonalAccessToken::create(&pool, user.id, data.device.clone(), None).await?;
+    let transient_token =
+        PersonalAccessToken::create(&pool, user.id, data.device.clone(), None).await?;
 
     let mut response = HttpResponse::Ok();
 
