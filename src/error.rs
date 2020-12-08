@@ -14,8 +14,6 @@ struct ErrorMessage {
 #[derive(Debug, Display)]
 #[allow(dead_code)]
 pub enum ServiceError {
-    ResponseError,
-
     #[display(fmt = "{}", _0)]
     BadRequest(String),
 

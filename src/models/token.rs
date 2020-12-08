@@ -8,7 +8,7 @@ use serde::{ser::SerializeStruct, Serialize, Serializer};
 use sqlx::{Done, PgPool};
 use std::ops::Add;
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct PersonalAccessToken {
     pub id: i64,
     pub user_id: i64,
@@ -55,8 +55,7 @@ impl PersonalAccessToken {
         let hashed = hash::make(value.clone())?;
         let abilities = abilities.unwrap_or(vec!["*".into()]);
 
-        let token = sqlx::query_as!(
-            TransientToken,
+        let token = sqlx::query!(
             r#"
                 INSERT INTO personal_access_tokens (user_id, name, token, abilities)
                 VALUES ($1, $2, $3, $4)
@@ -72,6 +71,10 @@ impl PersonalAccessToken {
         .map_err(|e| {
             log::error!("Could not create token:\n{}", e);
             ServiceError::Unknown
+        })
+        .map(|row| TransientToken {
+            id: row.id,
+            hash: value,
         })?;
 
         Ok(token)

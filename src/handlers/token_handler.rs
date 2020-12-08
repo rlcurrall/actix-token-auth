@@ -12,20 +12,28 @@ use actix_web::{
 };
 use sqlx::PgPool;
 
+fn make_cookie(config: &Config, token: Option<String>) -> Cookie<'static> {
+    Cookie::build("token", token.unwrap_or("".into()))
+        .path("/")
+        .http_only(true)
+        .secure(config.app_secure)
+        .finish()
+}
+
 #[get("/cookie")]
 pub async fn set_cookie(config: Data<Config>) -> impl Responder {
     HttpResponse::Ok()
-        .cookie(
-            Cookie::build("token", "")
-                .http_only(true)
-                .secure(config.app_secure)
-                .finish(),
-        )
+        .cookie(make_cookie(&config, None))
         .finish()
 }
 
 #[post("/login")]
-pub async fn login(req: HttpRequest, data: Json<TokenLogin>, pool: Data<PgPool>) -> impl Responder {
+pub async fn login(
+    req: HttpRequest,
+    data: Json<TokenLogin>,
+    pool: Data<PgPool>,
+    config: Data<Config>,
+) -> impl Responder {
     let user = User::find_by_email(&pool, data.email.clone()).await?;
 
     if !hash::check(user.password.clone(), data.password.clone())? {
@@ -40,11 +48,7 @@ pub async fn login(req: HttpRequest, data: Json<TokenLogin>, pool: Data<PgPool>)
     let mut response = HttpResponse::Ok();
 
     if req.cookie("token").is_some() {
-        response.cookie(
-            Cookie::build("token", transient_token.to_string())
-                .http_only(true)
-                .finish(),
-        );
+        response.cookie(make_cookie(&config, Some(transient_token.to_string())));
     }
 
     Ok(response.json(transient_token))
