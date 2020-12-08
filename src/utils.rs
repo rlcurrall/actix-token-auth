@@ -63,7 +63,10 @@ pub mod config {
                     .expect("Could not convert CORS_CREDENTIALS to a boolean."),
                 db_url: env::var("DATABASE_URL").expect("DATABASE_URL is not set."),
                 token_ttl: env::var("TOKEN_TTL")
-                    .map(|x| x.parse::<i64>().expect("Could not convert TOKEN_TTL to integer."))
+                    .map(|x| {
+                        x.parse::<i64>()
+                            .expect("Could not convert TOKEN_TTL to integer.")
+                    })
                     .ok(),
                 token_refresh: env::var("TOKEN_REFRESH")
                     .unwrap_or("false".into())
