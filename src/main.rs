@@ -21,10 +21,10 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .data(config.clone())
             .data(db_pool.clone())
+            .data(web::JsonConfig::default().limit(4096))
             .wrap(middleware::Logger::default())
             .wrap(utils::cors::init(config.clone()))
             .wrap(utils::auth::cookie_auth(config.clone()))
-            .data(web::JsonConfig::default().limit(4096))
             .configure(handlers::init)
     })
     .bind(address)?
