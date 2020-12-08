@@ -20,7 +20,8 @@ pub struct User {
 
 impl User {
     pub async fn find(pool: &PgPool, id: i64) -> Result<User> {
-        let res = sqlx::query!(
+        let user = sqlx::query_as!(
+            Self,
             r#"
                 SELECT *
                 FROM users
@@ -38,19 +39,12 @@ impl User {
             }
         })?;
 
-        Ok(User {
-            id: res.id,
-            email: res.email,
-            password: res.password,
-            full_name: res.full_name,
-            created_at: res.created_at,
-            updated_at: res.updated_at,
-            deleted_at: res.deleted_at,
-        })
+        Ok(user)
     }
 
     pub async fn find_by_email(pool: &PgPool, email: String) -> Result<User> {
-        let res = sqlx::query!(
+        let user = sqlx::query_as!(
+            Self,
             r#"
                 SELECT *
                 FROM users
@@ -68,15 +62,7 @@ impl User {
             }
         })?;
 
-        Ok(User {
-            id: res.id,
-            email: res.email,
-            password: res.password,
-            full_name: res.full_name,
-            created_at: res.created_at,
-            updated_at: res.updated_at,
-            deleted_at: res.deleted_at,
-        })
+        Ok(user)
     }
 
     pub async fn create(
@@ -86,7 +72,8 @@ impl User {
         full_name: String,
     ) -> Result<Self> {
         let password = hash::make(password);
-        let res = sqlx::query!(
+        let user = sqlx::query_as!(
+            Self,
             r#"
                 INSERT INTO users (email, password, full_name)
                 VALUES ($1, $2, $3)
@@ -103,15 +90,7 @@ impl User {
             ServiceError::Unknown
         })?;
 
-        Ok(Self {
-            id: res.id,
-            email: res.email,
-            password: res.password,
-            full_name: res.full_name,
-            created_at: res.created_at,
-            updated_at: res.updated_at,
-            deleted_at: res.deleted_at,
-        })
+        Ok(user)
     }
 
     pub async fn delete(pool: &PgPool, id: i64) -> Result<u64> {

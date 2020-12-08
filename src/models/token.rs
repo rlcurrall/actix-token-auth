@@ -24,7 +24,8 @@ impl PersonalAccessToken {
     pub async fn find_by_token(pool: &PgPool, token: String) -> Result<Self> {
         let transient_token = TransientToken::parse(token)?;
 
-        let res = sqlx::query!(
+        let pat = sqlx::query_as!(
+            Self,
             r#"
                 SELECT * FROM personal_access_tokens
                 WHERE id = $1
@@ -41,16 +42,6 @@ impl PersonalAccessToken {
             }
         })?;
 
-        let pat = Self {
-            id: res.id,
-            user_id: res.user_id,
-            name: res.name,
-            token: res.token,
-            abilities: res.abilities,
-            last_used_at: res.last_used_at,
-            created_at: res.created_at,
-        };
-
         Ok(pat)
     }
 
@@ -64,7 +55,8 @@ impl PersonalAccessToken {
         let hashed = hash::make(value.clone());
         let abilities = abilities.unwrap_or(vec!["*".into()]);
 
-        let token = sqlx::query!(
+        let token = sqlx::query_as!(
+            TransientToken,
             r#"
                 INSERT INTO personal_access_tokens (user_id, name, token, abilities)
                 VALUES ($1, $2, $3, $4)
@@ -80,10 +72,6 @@ impl PersonalAccessToken {
         .map_err(|e| {
             log::error!("Could not create token:\n{}", e);
             ServiceError::Unknown
-        })
-        .map(|t| TransientToken {
-            id: t.id,
-            hash: value,
         })?;
 
         Ok(token)
