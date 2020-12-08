@@ -2,7 +2,7 @@ use actix_web::{middleware, web, App, HttpServer};
 use dotenv::dotenv;
 use utils::{config, db};
 
-mod errors;
+mod error;
 mod handlers;
 mod models;
 mod requests;

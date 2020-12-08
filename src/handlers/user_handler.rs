@@ -1,4 +1,4 @@
-use crate::{errors::Result, models::User, requests::user::CreateUser};
+use crate::{error::Result, models::User, requests::user::CreateUser};
 use actix_web::{
     delete, get, post, put,
     web::{Data, Json, Path, ServiceConfig},
@@ -38,9 +38,15 @@ pub async fn delete(id: Path<i64>, pool: Data<PgPool>) -> Result<HttpResponse> {
     Ok(HttpResponse::NoContent().finish())
 }
 
+#[get("/me")]
+pub async fn me(me: User) -> impl Responder {
+    HttpResponse::Ok().json(me)
+}
+
 pub fn init(cfg: &mut ServiceConfig) {
     cfg.service(register);
     cfg.service(find);
     cfg.service(update);
     cfg.service(delete);
+    cfg.service(me);
 }

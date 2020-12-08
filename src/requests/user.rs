@@ -1,5 +1,5 @@
 use crate::{
-    errors::ServiceError,
+    error::ServiceError,
     models::{PersonalAccessToken, User},
 };
 use actix_identity::Identity;

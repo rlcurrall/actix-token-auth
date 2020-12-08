@@ -1,5 +1,5 @@
 use crate::{
-    errors::{Result, ServiceError},
+    error::{Result, ServiceError},
     models::{PersonalAccessToken, User},
     requests::token::TokenLogin,
     utils::{config::Config, hash},
@@ -67,19 +67,11 @@ pub async fn logout(
     Ok(res.finish())
 }
 
-#[get("/me")]
-pub async fn me(user: User, _pool: Data<PgPool>) -> Result<HttpResponse> {
-    // let user = User::find(&pool, bearer.user_id).await?;
-
-    Ok(HttpResponse::Ok().json(user))
-}
-
 pub fn init(cfg: &mut ServiceConfig) {
     cfg.service(
         web::scope("/token")
             .service(set_cookie)
             .service(login)
-            .service(logout)
-            .service(me),
+            .service(logout),
     );
 }

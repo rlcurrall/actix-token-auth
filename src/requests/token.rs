@@ -1,4 +1,4 @@
-use crate::{errors::ServiceError, models::PersonalAccessToken, utils::config::Config};
+use crate::{error::ServiceError, models::PersonalAccessToken, utils::config::Config};
 use actix_web::{dev::Payload, web::Data, Error, FromRequest, HttpMessage, HttpRequest};
 use actix_web_httpauth::extractors::bearer::BearerAuth;
 use serde::{Deserialize, Serialize};

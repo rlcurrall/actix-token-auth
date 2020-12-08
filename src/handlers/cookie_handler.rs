@@ -1,4 +1,4 @@
-use crate::{errors::ServiceError, models::User, requests::user::LoginRequest, utils::hash};
+use crate::{error::ServiceError, models::User, requests::user::LoginRequest, utils::hash};
 use actix_identity::Identity;
 use actix_web::{
     get, post,
@@ -31,16 +31,6 @@ pub async fn logout(id: Identity) -> impl Responder {
     HttpResponse::Ok().finish()
 }
 
-#[get("/me")]
-pub async fn me(me: User) -> impl Responder {
-    HttpResponse::Ok().json(me)
-}
-
 pub fn init(cfg: &mut ServiceConfig) {
-    cfg.service(
-        web::scope("/cookie")
-            .service(login)
-            .service(logout)
-            .service(me),
-    );
+    cfg.service(web::scope("/cookie").service(login).service(logout));
 }

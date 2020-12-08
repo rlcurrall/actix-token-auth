@@ -1,5 +1,5 @@
 use crate::{
-    errors::{Result, ServiceError},
+    error::{Result, ServiceError},
     utils::{config::Config, hash},
 };
 use chrono::{DateTime, Duration, Utc};
