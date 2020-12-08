@@ -42,11 +42,11 @@ pub mod config {
                 app_secure: env::var("APP_SECURE")
                     .unwrap_or("false".into())
                     .parse::<bool>()
-                    .unwrap(),
+                    .expect("Could not convert APP_SECURE to a boolean."),
                 app_debug: env::var("APP_DEBUG")
                     .unwrap_or("false".into())
                     .parse::<bool>()
-                    .unwrap(),
+                    .expect("Could not convert APP_DEBUG to a boolean."),
                 cors_methods: env::var("CORS_METHODS")
                     .unwrap_or("GET".into())
                     .split(",")
@@ -60,15 +60,15 @@ pub mod config {
                 cors_credentials: env::var("CORS_CREDENTIALS")
                     .unwrap_or("false".into())
                     .parse::<bool>()
-                    .unwrap(),
+                    .expect("Could not convert CORS_CREDENTIALS to a boolean."),
                 db_url: env::var("DATABASE_URL").expect("DATABASE_URL is not set."),
                 token_ttl: env::var("TOKEN_TTL")
-                    .map(|x| x.parse::<i64>().unwrap())
+                    .map(|x| x.parse::<i64>().expect("Could not convert TOKEN_TTL to integer."))
                     .ok(),
                 token_refresh: env::var("TOKEN_REFRESH")
                     .unwrap_or("false".into())
                     .parse::<bool>()
-                    .unwrap(),
+                    .expect("Could not convert TOKEN_REFRESH to a boolean."),
             }
         }
     }
@@ -126,20 +126,31 @@ pub mod db {
 }
 
 pub mod hash {
+    use crate::error::{Result, ServiceError};
     use argon2;
     use std::env;
 
-    pub fn make(value: String) -> String {
-        argon2::hash_encoded(
+    pub fn make(value: String) -> Result<String> {
+        let hash = argon2::hash_encoded(
             value.as_bytes(),
             env::var("APP_KEY").expect("APP_KEY not set.").as_bytes(),
             &argon2::Config::default(),
         )
-        .unwrap()
+        .map_err(|e| {
+            log::error!("Could not hash value:\n{}", e);
+            ServiceError::Unknown
+        })?;
+
+        Ok(hash)
     }
 
-    pub fn check(hash: String, value: String) -> bool {
-        argon2::verify_encoded(hash.as_str(), value.as_bytes()).unwrap()
+    pub fn check(hash: String, value: String) -> Result<bool> {
+        let valid = argon2::verify_encoded(hash.as_str(), value.as_bytes()).map_err(|e| {
+            log::error!("Could not hash value:\n{}", e);
+            ServiceError::Unknown
+        })?;
+
+        Ok(valid)
     }
 }
 

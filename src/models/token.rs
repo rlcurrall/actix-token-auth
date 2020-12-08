@@ -52,7 +52,7 @@ impl PersonalAccessToken {
         abilities: Option<Vec<String>>,
     ) -> Result<TransientToken> {
         let value: String = thread_rng().sample_iter(&Alphanumeric).take(64).collect();
-        let hashed = hash::make(value.clone());
+        let hashed = hash::make(value.clone())?;
         let abilities = abilities.unwrap_or(vec!["*".into()]);
 
         let token = sqlx::query_as!(
@@ -120,7 +120,7 @@ impl PersonalAccessToken {
         let transient_token = TransientToken::parse(token)?;
 
         let expired: bool;
-        let valid_hash = hash::check(self.token.clone(), transient_token.hash);
+        let valid_hash = hash::check(self.token.clone(), transient_token.hash)?;
 
         expired = match (config.token_ttl, config.token_refresh) {
             (Some(ttl), true) => Utc::now().ge(&self.last_used_at.add(Duration::minutes(ttl))),

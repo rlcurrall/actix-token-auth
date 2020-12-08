@@ -71,7 +71,7 @@ impl User {
         password: String,
         full_name: String,
     ) -> Result<Self> {
-        let password = hash::make(password);
+        let password = hash::make(password)?;
         let user = sqlx::query_as!(
             Self,
             r#"

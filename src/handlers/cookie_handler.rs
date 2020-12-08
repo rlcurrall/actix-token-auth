@@ -15,7 +15,7 @@ pub async fn login(
 ) -> impl Responder {
     let user = User::find_by_email(&pool, request.email.clone()).await?;
 
-    if hash::check(user.password.clone(), request.password.clone()) {
+    if hash::check(user.password.clone(), request.password.clone())? {
         id.remember(user.id.to_string());
         return Ok(HttpResponse::Ok().finish());
     } else {

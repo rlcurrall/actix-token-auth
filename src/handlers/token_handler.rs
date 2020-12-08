@@ -28,7 +28,7 @@ pub async fn set_cookie(config: Data<Config>) -> impl Responder {
 pub async fn login(req: HttpRequest, data: Json<TokenLogin>, pool: Data<PgPool>) -> impl Responder {
     let user = User::find_by_email(&pool, data.email.clone()).await?;
 
-    if !hash::check(user.password.clone(), data.password.clone()) {
+    if !hash::check(user.password.clone(), data.password.clone())? {
         return Err(ServiceError::BadRequest(
             "These credentials do not match our records.".into(),
         ));
