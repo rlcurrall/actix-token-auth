@@ -78,8 +78,11 @@ pub mod config {
 }
 
 pub mod cors {
-    pub fn init(config: super::config::Config) -> actix_cors::Cors {
-        let mut policy = actix_cors::Cors::default();
+    use super::config::Config;
+    use actix_cors::Cors;
+
+    pub fn init(config: Config) -> Cors {
+        let mut policy = Cors::default().allow_any_header();
 
         policy = match config.cors_credentials {
             true => policy.supports_credentials(),
