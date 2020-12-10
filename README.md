@@ -58,3 +58,9 @@ cd web && npm run dev
 ### 5. Open Browser
 
 Once you have completed all the above steps, you can now open your browser to http://web.my-app.test:3000 to be able to interact with the application.
+
+## Side not about Actix Identity
+The Actix server also implements authentication using Actix Identity (cookie auth). You will see some commented
+out code in the Vue app where it is making requests to a different login endpoint. This is certainly a viable
+solution to setting up authentication with the API, though cannot be easily used by mobile applications, and
+does not provide the same ability to easily see all logged in devices and revoke their access.
