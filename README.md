@@ -7,7 +7,7 @@ mobile apps and SPA apps to easily authenticate and use the same APIs. This impl
 to easily see all devices that are currently logged in for the user, and invalidate a token before it expires
 which is not trivial when using JWT tokens.
 
-This repo also demonstrates how to securely store authentication tokens in a web application. Using the local
+This repo also demonstrates one way to securely store authentication tokens in a web application. Using the local
 storage to store tokens so they do not get lost on page refresh can be a security vulnerability, so it is
 recommended that these tokens be stored on a http-only cookie so they cannot be accessed by a malicious script.
 
