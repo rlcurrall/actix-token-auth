@@ -5,24 +5,25 @@ use crate::{
     utils::{config::Config, hash},
 };
 use actix_web::{
-    cookie::{Cookie, CookieBuilder},
+    cookie::Cookie,
     get, post,
     web::{self, Data, Json, ServiceConfig},
     HttpMessage, HttpRequest, HttpResponse, Responder,
 };
 use sqlx::PgPool;
 
-fn make_cookie(config: &Config, token: Option<String>) -> CookieBuilder<'static> {
+fn make_cookie(config: &Config, token: Option<String>) -> Cookie<'static> {
     Cookie::build("token", token.unwrap_or("".into()))
         .path("/")
         .http_only(true)
         .secure(config.app_secure)
+        .finish()
 }
 
 #[get("/cookie")]
 pub async fn set_cookie(config: Data<Config>) -> impl Responder {
     HttpResponse::Ok()
-        .cookie(make_cookie(&config, None).finish())
+        .cookie(make_cookie(&config, None))
         .finish()
 }
 
@@ -47,7 +48,7 @@ pub async fn login(
     let mut response = HttpResponse::Ok();
 
     if req.cookie("token").is_some() {
-        response.cookie(make_cookie(&config, Some(transient_token.to_string())).finish());
+        response.cookie(make_cookie(&config, Some(transient_token.to_string())));
     }
 
     Ok(response.json(transient_token))
@@ -62,12 +63,10 @@ pub async fn logout(
     bearer.delete(&pool).await?;
 
     let mut res = HttpResponse::NoContent();
+    let mut cookie = make_cookie(&config, None);
 
-    res.cookie(
-        make_cookie(&config, None)
-            .expires(time::OffsetDateTime::now_utc())
-            .finish(),
-    );
+    cookie.set_expires(time::OffsetDateTime::now_utc());
+    res.cookie(cookie);
 
     Ok(res.finish())
 }
