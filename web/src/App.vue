@@ -188,6 +188,8 @@ export default {
         let mobileOpen = ref(false)
         let logout = async function () {
             try {
+                //// Using Actix Identity works as well
+                // let res = await http.get('cookie/logout')
                 let res = await http.get('token/logout')
                 router.push({ name: 'login' })
             } catch (e) {

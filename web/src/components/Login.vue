@@ -128,6 +128,12 @@ export default {
             await http.get('/token/cookie')
 
             try {
+                //// Using Actix Identity works as well
+                // await http.post('cookie/login', {
+                //     email: email.value,
+                //     password: password.value,
+                //     device: 'iphone-x',
+                // })
                 await http.post('token/login', {
                     email: email.value,
                     password: password.value,
