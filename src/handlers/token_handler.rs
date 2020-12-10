@@ -5,25 +5,24 @@ use crate::{
     utils::{config::Config, hash},
 };
 use actix_web::{
-    cookie::Cookie,
+    cookie::{Cookie, CookieBuilder},
     get, post,
     web::{self, Data, Json, ServiceConfig},
     HttpMessage, HttpRequest, HttpResponse, Responder,
 };
 use sqlx::PgPool;
 
-fn make_cookie(config: &Config, token: Option<String>) -> Cookie<'static> {
+fn make_cookie(config: &Config, token: Option<String>) -> CookieBuilder<'static> {
     Cookie::build("token", token.unwrap_or("".into()))
         .path("/")
         .http_only(true)
         .secure(config.app_secure)
-        .finish()
 }
 
 #[get("/cookie")]
 pub async fn set_cookie(config: Data<Config>) -> impl Responder {
     HttpResponse::Ok()
-        .cookie(make_cookie(&config, None))
+        .cookie(make_cookie(&config, None).finish())
         .finish()
 }
 
@@ -48,7 +47,7 @@ pub async fn login(
     let mut response = HttpResponse::Ok();
 
     if req.cookie("token").is_some() {
-        response.cookie(make_cookie(&config, Some(transient_token.to_string())));
+        response.cookie(make_cookie(&config, Some(transient_token.to_string())).finish());
     }
 
     Ok(response.json(transient_token))
@@ -56,17 +55,19 @@ pub async fn login(
 
 #[get("/logout")]
 pub async fn logout(
-    req: HttpRequest,
     bearer: PersonalAccessToken,
     pool: Data<PgPool>,
+    config: Data<Config>,
 ) -> Result<HttpResponse> {
     bearer.delete(&pool).await?;
 
     let mut res = HttpResponse::NoContent();
 
-    if let Some(ref cookie) = req.cookie("token") {
-        res.del_cookie(cookie);
-    }
+    res.cookie(
+        make_cookie(&config, None)
+            .expires(time::OffsetDateTime::now_utc())
+            .finish(),
+    );
 
     Ok(res.finish())
 }
