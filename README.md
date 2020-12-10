@@ -8,8 +8,9 @@ The implementation used is inspired by [Laravel Sanctum](https://github.com/lara
 
 ### 1. Add entry to hosts file for local development
 
-This is certainly not a requirement, but just to demonstrate that the API and the SPA need to be running on
-the same domain, though they can exist on different sub-domains.
+This is certainly not a requirement, but just to demonstrate that if you wish to have the authentication token
+stored on a http-only cookie, the API and the SPA need to be running on the same domain, though they can exist
+on different sub-domains.
 
 Add the following lines to your `/etc/hosts` file:
 ```
