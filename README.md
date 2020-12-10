@@ -1,6 +1,15 @@
-# Actix Web & SPA Token Authentication
+# Actix Web Token Authentication
 
 This repository is an example for creating an Actix Web API that is consumed by a Vue single page application.
+
+Specifically, this demonstrates how to create a token authentication system with Actix that allows for both
+mobile apps and SPA apps to easily authenticate and use the same APIs. This implementation also provides a way
+to easily see all devices that are currently logged in for the user, and invalidate a token before it expires
+which is not trivial when using JWT tokens.
+
+This repo also demonstrates how to securely store authentication tokens in a web application. Using the local
+storage to store tokens so they do not get lost on page refresh can be a security vulnerability, so it is
+recommended that these tokens be stored on a http-only cookie so they cannot be accessed by a malicious script.
 
 The implementation used is inspired by [Laravel Sanctum](https://github.com/laravel/sanctum).
 
