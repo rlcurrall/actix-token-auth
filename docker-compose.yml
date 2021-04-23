@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - api
+    ports:
+      - 3000:3000
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    environment:
+      VITE_API_ORIGIN: localhost:8080
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile.dev
+    depends_on:
+      - database
+    ports:
+      - 8080:8080
+    volumes:
+      - ./api:/app
+      - ./api/logs:/app/logs
+    environment:
+      APP_KEY: 'L95FqymVpvBJIdYrKDJeUAFeAX4BwDqP'
+      APP_DEBUG: 'true'
+      APP_SECURE: 'false'
+      APP_DOMAIN: '127.0.0.1:8080'
+      APP_ADDRESS: '127.0.0.1'
+      APP_PORT: '8080'
+      CORS_ORIGINS: '127.0.0.1:3000,127.0.0.1:8080,localhost:3000,localhost:8080'
+      CORS_METHODS: '*'
+      CORS_CREDENTIALS: 'true'
+      LOG_LEVEL: 'debug'
+      DATABASE_URL: 'postgres://api_user:password@database/api'
+      TOKEN_TTL: '120'
+      TOKEN_REFRESH: 'false'
+
+  database:
+    image: postgres:13-alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: api
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: api_user
+    volumes:
+      - pg_data:/var/lib/postgresql/data:rw
+
+volumes:
+  pg_data:

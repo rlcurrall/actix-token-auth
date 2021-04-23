@@ -7,8 +7,8 @@ logs/*
 _*
 
 # Rust specific files
-/target
-/debug
+**/*/target
+**/*/debug
 Cargo.lock
 **/*.rs.bk
 

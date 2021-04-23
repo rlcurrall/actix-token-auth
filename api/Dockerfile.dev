@@ -1,0 +1,8 @@
+FROM rust
+
+WORKDIR /app
+COPY . .
+RUN cargo install cargo-watch
+RUN cargo install sqlx-cli --no-default-features --features postgres
+
+CMD ["cargo", "run"]
